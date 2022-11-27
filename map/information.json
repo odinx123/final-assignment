@@ -2,7 +2,7 @@
     "lobby": {
         "east": "map02",
         "north": "map01",
-        "south": "null",
+        "south": "market",
         "west": "map03"
     },
     "map01": {
@@ -20,6 +20,12 @@
     "map03": {
         "east": "lobby",
         "north": "null",
+        "south": "null",
+        "west": "null"
+    },
+    "market": {
+        "east": "null",
+        "north": "lobby",
         "south": "null",
         "west": "null"
     }

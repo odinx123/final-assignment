@@ -61,9 +61,11 @@ class Map {
     void clearMes(SHORT x, SHORT y, SHORT size_);
     void setAllCity();
     inline void setInfoCursorPos(SHORT x, SHORT y);
-    std::string getEngCityName(int i) { return mapDictI2E[i]; }
-    std::string getChsCityName(int i) { return mapDictI2C[i]; }
+    std::string getEngCityName(int i) { return mapDictI2E.find(i) != mapDictI2E.end() ? mapDictI2E[i] : ""; }
+    std::string getChsCityName(int i) { return mapDictI2C.find(i) != mapDictI2C.end() ? mapDictI2C[i] : ""; }
     int getCityNum() const { return mapDictI2E.size(); }
+    void showCityNumbering(SHORT x, SHORT y);
+    void clearCityNumbering(SHORT x, SHORT y);
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);
@@ -288,6 +290,26 @@ void Map::testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT 
 
 void Map::setInfoCursorPos(SHORT x, SHORT y) {
     setStdCursorPos(x, height + y + 1);
+}
+
+void Map::showCityNumbering(SHORT x, SHORT y) {
+    COORD orgPos = getCursorPos();
+    setInfoCursorPos(x, y);
+	for (int j = 0; j < getCityNum(); ++j) {
+		setInfoCursorPos(x, y+j);
+		std::cout << j << ": " << getChsCityName(j);
+	}
+	setStdCursorPos(orgPos.X, orgPos.Y);
+}
+
+void Map::clearCityNumbering(SHORT x, SHORT y) {
+    COORD orgPos = getCursorPos();
+    setInfoCursorPos(x, y);
+	for (int j = 0; j < getCityNum(); ++j) {
+		setInfoCursorPos(x, y+j);
+        std::cout << std::string(4+getChsCityName(j).size(), ' ');
+	}
+	setStdCursorPos(orgPos.X, orgPos.Y);
 }
 
 #endif
