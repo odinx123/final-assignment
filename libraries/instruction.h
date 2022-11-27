@@ -43,8 +43,11 @@ int funcMove(const std::vector<std::string>& tokens) {
         (std::cin >> i).get();
         globalVar::screen->setCursorVisible(false);
 
-        if (std::cin.fail())
+        if (std::cin.fail()) {
+            globalVar::screen->setColor(4);
             globalVar::screen->setMes("This map does not exist.", 0, 0);
+            globalVar::screen->setColor();
+        }
 
         globalVar::screen->clearMes(0, 5, 10);
         globalVar::screen->clearMes(0, 4, mes.size());
@@ -60,7 +63,9 @@ int funcMove(const std::vector<std::string>& tokens) {
         try {
         	globalVar::screen->loadMap(globalVar::screen->getEngCityName(std::stoi(tokens[1])));
         } catch (const std::invalid_argument& e) {
+            globalVar::screen->setColor(4);
 			globalVar::screen->setMes("This map does not exist.", 0, 0);
+            globalVar::screen->setColor();
             return 1;
         }
 
@@ -89,6 +94,7 @@ int Instruction::insertCommand() {
     if (tokens.size() == 0) {
 		globalVar::screen->clearMes(0, 4, mes.size());
 		globalVar::screen->clearMes(0, 5, sentense.size());
+        globalVar::screen->setCursorVisible(false);
 		return 0;
 	}
 
