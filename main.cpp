@@ -12,7 +12,9 @@ int main() {
     globalVar::Command = new Instruction;
     globalVar::screen = new Map(25);
     globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
-    
+
+    Job user1(50, 30, 20);
+    user1.showInfo();
 
     while (true) {
         if (_kbhit()) {

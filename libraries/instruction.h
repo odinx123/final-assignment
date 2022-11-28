@@ -24,6 +24,7 @@ int funcExit(const std::vector<std::string>& tokens) {
 }
 
 int funcMove(const std::vector<std::string>& tokens) {
+    SHORT cityNumx = 25, cityNumy = 4;
     if (tokens.size() != 1 && tokens.size() != 2) {
         globalVar::screen->setColor(4);
         globalVar::screen->setMes("指令錯誤!!!", 0, 0);
@@ -37,7 +38,7 @@ int funcMove(const std::vector<std::string>& tokens) {
         std::string mes = "請輸入指令:";
         std::cout << mes << std::endl;
 
-        globalVar::screen->showCityNumbering(30, 1);
+        globalVar::screen->showCityNumbering(cityNumx, cityNumy);
 
         globalVar::screen->setCursorVisible(true);
         (std::cin >> i).get();
@@ -51,7 +52,7 @@ int funcMove(const std::vector<std::string>& tokens) {
 
         globalVar::screen->clearMes(0, 5, 10);
         globalVar::screen->clearMes(0, 4, mes.size());
-        globalVar::screen->clearCityNumbering(30, 1);
+        globalVar::screen->clearCityNumbering(cityNumx, cityNumy);
 
         if (std::cin.fail()) {
 			fflush(stdin);

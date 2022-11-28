@@ -66,6 +66,7 @@ class Map {
     int getCityNum() const { return mapDictI2E.size(); }
     void showCityNumbering(SHORT x, SHORT y);
     void clearCityNumbering(SHORT x, SHORT y);
+    std::string getCurCity() const { return curCity; }
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);

@@ -37,24 +37,20 @@ ifstream file_in;
 //     j.at("b").get_to(t.b);
 // }
 
+void setColor(WORD color = 7) {
+    auto stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(stdBuf, color);
+}
+
 int main() {
     SetConsoleOutputCP(65001);
 
-    string path = "D:\\Programming\\final\\map\\map01.txt";
-    file_in.imbue(loc);
-    cin.imbue(loc);
-    cout.imbue(loc);
-    file_in.open(path);
-    string s;
-
-    cout << "我" << endl;
-    DWORD a;
-    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), L"我", 2, nullptr, nullptr);
-    // getline(file_in, s);
-    file_in >> s;
-    cout << s << endl;
-    cin >> s;
-    cout << s << endl;
+    setColor(12);
+    for (int i = 0; i < 10; ++i) {
+        cout << "♥";
+    }
+    cout << endl;
+    setColor();
 
     system("pause");
     return 0;
