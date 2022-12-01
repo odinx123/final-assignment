@@ -44,8 +44,7 @@ class Map {
     std::unordered_set<std::string> fileList;
 
    public:
-    Map() = default;
-    Map(SHORT Height);
+    Map(SHORT Height = 25, const std::string curm = "map01");
 
     void loadMap(const std::string& name);
     inline void setStdCursorPos(SHORT x, SHORT y) const;
@@ -78,7 +77,7 @@ class Map {
     void showMap(uodMap_sb& hash_, std::string name, SHORT x, SHORT y);
 };
 
-Map::Map(SHORT Height) {
+Map::Map(SHORT Height, const std::string curm) {
     height = Height;
     stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -97,9 +96,9 @@ Map::Map(SHORT Height) {
 
     mapRam.resize(getConsoleHeight(), std::wstring());
 
-    setAllCity();
-    loadMap("map01");
-    showMap(90, 1);
+    // setAllCity();
+    // loadMap(curm);
+    // showMap(90, 1);
 }
 
 void Map::loadMap(const std::string& name) {

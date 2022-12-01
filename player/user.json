@@ -1,5 +1,20 @@
 {
-    "account": {
-        
-    }
+    "account": [
+        {
+            "ID": "odinx123",
+            "passwd": "9879",
+            "curCity": "map03",
+            "job": [
+                {
+                    "jobName": 1,
+                    "status": {
+                        "HP": 60,
+                        "DF": 60,
+                        "AP": 60,
+                        "curHP": 20
+                    }
+                }
+            ]
+        }
+    ]
 }

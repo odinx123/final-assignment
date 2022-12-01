@@ -4,6 +4,7 @@
 #include "map.h"
 #include "function.h"
 #include "instruction.h"
-#include "job.h"
+#include "warrior.h"
+#include "user.h"
 
 #endif

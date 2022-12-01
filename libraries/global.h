@@ -8,15 +8,18 @@
 
 class Instruction;
 class Map;
+class User;
 
 namespace globalVar {
     // var
-    std::fstream file_in;
+    std::ifstream file_in;
+    std::ofstream file_out;
     std::stringstream stream;
     
     // class
-    Map* screen;
-    Instruction* Command;
+    User* user = nullptr;
+    Map* screen = nullptr;
+    Instruction* Command = nullptr;
 };
 
 #endif

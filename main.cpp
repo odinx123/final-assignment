@@ -8,32 +8,11 @@
 #include "libraries/MyFunction.h"
 using namespace std;
 
-int main() {
-    globalVar::Command = new Instruction;
-    globalVar::screen = new Map(25);
-    globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
+inline void initializeGame();
 
-    Job user1(50, 30, 30);
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.clearAllStatus();
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.clearAllStatus();
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.clearAllStatus();
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.clearAllStatus();
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.clearAllStatus();
-    // user1.addDF(80, 5000);
-    // user1.addAP(80, 5000);
-    // user1.subAP(101, 3000);
-    // user1.subDF(101, 3000);
-    // user1.clearAllStatus();
+int main() {
+    initializeGame();
+    // User user;
 
     while (true) {
         if (_kbhit()) {
@@ -64,4 +43,15 @@ int main() {
 
     system("pause");
     return 0;
+}
+
+void initializeGame() {
+    User user;
+    globalVar::Command = new Instruction;
+    globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
+
+    user.wa->showInfo();
+    user.wa->addAP(100, 5000);
+    // user1.showInfo();
+    // user1.addAP(100, 2000);
 }
