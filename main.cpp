@@ -13,8 +13,27 @@ int main() {
     globalVar::screen = new Map(25);
     globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
 
-    Job user1(50, 30, 20);
-    user1.showInfo();
+    Job user1(50, 30, 30);
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.clearAllStatus();
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.clearAllStatus();
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.clearAllStatus();
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.clearAllStatus();
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.clearAllStatus();
+    // user1.addDF(80, 5000);
+    // user1.addAP(80, 5000);
+    // user1.subAP(101, 3000);
+    // user1.subDF(101, 3000);
+    // user1.clearAllStatus();
 
     while (true) {
         if (_kbhit()) {

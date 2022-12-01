@@ -12,6 +12,7 @@ void get_path(std::string& path);
 void getFiles(const std::string& path, std::vector<std::string>& files);
 void getFiles(const std::string& path, std::unordered_set<std::string>& files);
 void setfps(double timePerFrame);
+void delay(int ms);
 
 void get_path(std::string& path) {
     char Full_path[_MAX_PATH];
@@ -69,6 +70,11 @@ void setfps(double timePerFrame) {
     lastTime = nowTime;
     if (deltaTime <= timePerFrame)
         Sleep(timePerFrame - deltaTime);
+}
+
+void delay(int ms) {
+    clock_t start = clock();
+    while (clock()-start < ms);
 }
 
 #endif

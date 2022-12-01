@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "D:\\SoftWare\\cppLibrary\\nlhmannJson\\single_include"
+                // "D:\\SoftWare\\cppLibrary\\boost_1_80_0"
             ],
             "defines": [
                 "_DEBUG",

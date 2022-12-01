@@ -33,12 +33,14 @@ class Map {
     std::string curCity;
     COORD northPos;
     COORD westPos;
+    COORD mapPos;
     std::string northCity;
     std::string westCity;
     uodMap_ss mapDict;
     uodMap_is mapDictI2E;
     uodMap_is mapDictI2C;
     std::string tempCity;
+    std::vector<std::wstring> mapRam;
     std::unordered_set<std::string> fileList;
 
    public:
@@ -64,9 +66,12 @@ class Map {
     std::string getEngCityName(int i) { return mapDictI2E.find(i) != mapDictI2E.end() ? mapDictI2E[i] : ""; }
     std::string getChsCityName(int i) { return mapDictI2C.find(i) != mapDictI2C.end() ? mapDictI2C[i] : ""; }
     int getCityNum() const { return mapDictI2E.size(); }
-    void showCityNumbering(SHORT x, SHORT y);
-    void clearCityNumbering(SHORT x, SHORT y);
+    void showCityNumbering();
     std::string getCurCity() const { return curCity; }
+    inline void putSaveScreen();
+    inline void setToMapPos();
+    void printMapMes(const std::string& mes);
+    void saveScreen();
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);
@@ -90,6 +95,7 @@ Map::Map(SHORT Height) {
     globalVar::file_in >> info;
     globalVar::file_in.close();
 
+    mapRam.resize(getConsoleHeight(), std::wstring());
 
     setAllCity();
     loadMap("map01");
@@ -113,7 +119,7 @@ void Map::loadMap(const std::string& name) {
     curCity = name;
     clearMap();
     clearMes(0, 0, 30);
-    clearMes(0, 1, 30);
+    clearMes(0, 1, 27);
     setStdCursorPos(0, height + 2);
 
     std::string temp;
@@ -135,6 +141,8 @@ void Map::loadMap(const std::string& name) {
         getline(globalVar::file_in, temp);
         std::cout << temp << std::endl;
     }
+    mapPos = getCursorPos();
+    ++mapPos.Y;
     heightPos = getCursorPos().Y+1;
     globalVar::file_in.close();
     setStdCursorPos(0, 0);
@@ -293,24 +301,56 @@ void Map::setInfoCursorPos(SHORT x, SHORT y) {
     setStdCursorPos(x, height + y + 1);
 }
 
-void Map::showCityNumbering(SHORT x, SHORT y) {
+void Map::showCityNumbering() {
     COORD orgPos = getCursorPos();
-    setInfoCursorPos(x, y);
-	for (int j = 0; j < getCityNum(); ++j) {
-		setInfoCursorPos(x, y+j);
-		std::cout << j << ": " << getChsCityName(j);
-	}
+	for (int j = 0; j < getCityNum(); ++j)
+        printMapMes(std::to_string(j)+": "+getChsCityName(j));
 	setStdCursorPos(orgPos.X, orgPos.Y);
 }
 
-void Map::clearCityNumbering(SHORT x, SHORT y) {
-    COORD orgPos = getCursorPos();
-    setInfoCursorPos(x, y);
-	for (int j = 0; j < getCityNum(); ++j) {
-		setInfoCursorPos(x, y+j);
-        std::cout << std::string(4+getChsCityName(j).size(), ' ');
-	}
-	setStdCursorPos(orgPos.X, orgPos.Y);
+void Map::saveScreen() {
+    auto orgPos = getCursorPos();
+    SHORT w = getConsoleWidth();
+    DWORD bytes;
+
+    for (SHORT i = 0; i < height; ++i) {
+        wchar_t* t = new wchar_t[w+1]();
+        ReadConsoleOutputCharacterW(stdBuf, t, w, {0, i}, &bytes);
+        mapRam[i] = t;
+        delete[] t;
+    }
+    SetConsoleCursorPosition(stdBuf, orgPos);
+}
+
+void Map::putSaveScreen() {
+    auto orgPos = getCursorPos();
+    for (SHORT i = 0; i < height; ++i)
+        WriteConsoleW(stdBuf, mapRam[i].c_str(), mapRam[i].size(), nullptr, nullptr);
+    SetConsoleCursorPosition(stdBuf, orgPos);
+}
+
+void Map::setToMapPos() {
+    SetConsoleCursorPosition(stdBuf, mapPos);
+}
+
+void Map::printMapMes(const std::string& mes) {
+    auto orgPos = getCursorPos();
+    SetConsoleCursorPosition(stdBuf, mapPos);
+    if (mapPos.Y >= height) {
+        mapPos.Y = height - 1;
+        auto times = mes.size() / getConsoleWidth();
+        saveScreen();
+        for (int j = 0; j <= times; ++j) {
+            for (int i = 1; i < height; ++i) {
+                setStdCursorPos(0, i-1);
+                WriteConsoleW(stdBuf, mapRam[i].c_str(), mapRam[i].size(), nullptr, nullptr);
+            }
+        }
+    }
+    WriteConsole(stdBuf, mes.c_str(), mes.size(), nullptr, nullptr);
+    mapPos.X = 0;
+    mapPos.Y = getCursorPos().Y+1;
+    SetConsoleCursorPosition(stdBuf, orgPos);
 }
 
 #endif

@@ -8,9 +8,11 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "-std=c++14",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-ID:\\SoftWare\\cppLibrary\\nlhmannJson\\single_include"
+                // "-ID:\\SoftWare\\cppLibrary\\boost_1_80_0"
             ],
             "options": {
                 "cwd": "${fileDirname}"

@@ -1,56 +1,36 @@
-#include <fcntl.h>
-#include <io.h>
-#include <windows.h>
-
-#include <codecvt>
-#include <fstream>
-#include <iomanip>
+#include <thread>
 #include <iostream>
-#include <locale>
-#include <vector>
-
-// #include "libraries/MyFunction.h"
-// #include "nlohmann/json.hpp"
+#include <chrono>
+#include <mutex>
+#include <atomic>
+#include <string>
+#include <windows.h>
+using std::chrono::milliseconds;
+using std::chrono::seconds;
 using namespace std;
-// using namespace nlohmann;
 
-// auto stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
-std::locale loc(std::locale(), new std::codecvt_utf8<wchar_t>);
-ifstream file_in;
-// ofstream file_out;
+std::mutex s_mutex;
+std::atomic_bool s_running {true};
 
-// class test {
-//     friend void to_json(nlohmann::json& j, const test& t);
-//     friend void from_json(const nlohmann::json& j, test& t);
-//     int a = 0;
-//     int b = 1;
+static void output(std::string const& msg) {
+    // std::lock_guard<std::mutex> lk(s_mutex);
+    std::this_thread::sleep_for(milliseconds(500));
+    std::cout << msg << "\n";
+}
 
-//    public:
-//     int donothing() { return 1; }
-// };
+void count_thread_func(int d) {
+    for (int i = 0; i < 5; ++i) {
+        std::this_thread::sleep_for(seconds(1));
+        output("COUNTER AT " + std::to_string(i+1));
+    }
 
-// void to_json(nlohmann::json& j, const test& t) {
-//     j = nlohmann::json{{"a", t.a}, {"b", t.b}};
-// }
-// void from_json(const nlohmann::json& j, test& t) {
-//     j.at("a").get_to(t.a);
-//     j.at("b").get_to(t.b);
-// }
-
-void setColor(WORD color = 7) {
-    auto stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(stdBuf, color);
+    s_running = false;
 }
 
 int main() {
-    SetConsoleOutputCP(65001);
-
-    setColor(12);
-    for (int i = 0; i < 10; ++i) {
-        cout << "♥";
-    }
-    cout << endl;
-    setColor();
+    auto start = std::chrono::system_clock::now();
+    Sleep(1000);
+    cout << (std::chrono::system_clock::now()-start).count()/1000000.f << endl;
 
     system("pause");
     return 0;
