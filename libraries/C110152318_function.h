@@ -12,6 +12,7 @@ void get_path(std::string& path);
 void getFiles(const std::string& path, std::vector<std::string>& files);
 void getFiles(const std::string& path, std::unordered_set<std::string>& files);
 void setfps(double timePerFrame);
+int getNumberSize(int n);
 
 void get_path(std::string& path) {
     char Full_path[_MAX_PATH];
@@ -69,6 +70,15 @@ void setfps(double timePerFrame) {
     lastTime = nowTime;
     if (deltaTime <= timePerFrame)
         Sleep(timePerFrame - deltaTime);
+}
+
+int getNumberSize(int n) {
+    int cnt = 0;
+    while (n != 0) {
+        ++cnt;
+        n /= 10;
+    }
+    return cnt;
 }
 
 #endif

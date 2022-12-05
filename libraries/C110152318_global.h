@@ -9,6 +9,7 @@
 class Instruction;
 class Map;
 class User;
+class Bag;
 
 namespace globalVar {
     // var
@@ -20,6 +21,7 @@ namespace globalVar {
     User* user = nullptr;
     Map* screen = nullptr;
     Instruction* Command = nullptr;
+    Bag* bg = nullptr;
 };
 
 #endif

@@ -11,8 +11,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "function.h"
-#include "global.h"
+#include "C110152318_function.h"
+#include "C110152318_global.h"
 
 #define WEST "west"
 #define EAST "east"
@@ -71,6 +71,7 @@ class Map {
     inline void setToMapPos();
     void printMapMes(const std::string& mes);
     void saveScreen();
+    inline COORD getCurMesPos() const;
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);
@@ -108,6 +109,7 @@ void Map::loadMap(const std::string& name) {
     setStdCursorPos(0, height);
     std::cout << std::string(width, '=');
 
+    clearMes(0, 0, 30);
     if (fileList.count(curMapFile) <= 0) {
         setColor(4);
         setMes("This map does not exist.", 0, 0);
@@ -346,10 +348,21 @@ void Map::printMapMes(const std::string& mes) {
             }
         }
     }
+    auto curPos = getCursorPos();
+    setStdCursorPos(curPos.X, curPos.Y);
+    std::cout << std::string(getConsoleWidth(), ' ');
+    setStdCursorPos(curPos.X, curPos.Y);
     WriteConsole(stdBuf, mes.c_str(), mes.size(), nullptr, nullptr);
     mapPos.X = 0;
     mapPos.Y = getCursorPos().Y+1;
     SetConsoleCursorPosition(stdBuf, orgPos);
+    Sleep(10);
+}
+
+COORD Map::getCurMesPos() const {
+    auto pos = getCursorPos();
+    pos.Y -= height+1;
+    return pos;
 }
 
 #endif

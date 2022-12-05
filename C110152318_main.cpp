@@ -1,11 +1,9 @@
 #include <conio.h>
 
-#include <codecvt>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
-#include "libraries/MyFunction.h"
+#include "libraries/C110152318_MyFunction.h"
 using namespace std;
 
 inline void initializeGame();
@@ -13,8 +11,9 @@ inline void initializeGame();
 int main() {
     initializeGame();
     // User user;
+    bool gameState = true;
 
-    while (true) {
+    while (gameState) {
         if (_kbhit()) {
             switch (_getch()) {
                 case 119:  // 上
@@ -34,24 +33,29 @@ int main() {
                     globalVar::screen->move(EAST);
                     break;
                 case 47:
-                    globalVar::Command->insertCommand();
+                    auto ti = globalVar::Command->insertCommand();
+                    gameState = ti == -1 ? 0 : 1;
                     break;
             }
         }
         setfps(60);
     }
-
+    
+    system("cls");
     system("pause");
     return 0;
 }
 
 void initializeGame() {
-    User user;
+    globalVar::user = new User;
     globalVar::Command = new Instruction;
+    globalVar::bg = new Bag;
     globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
 
-    user.wa->showInfo();
-    user.wa->addAP(100, 5000);
-    // user1.showInfo();
-    // user1.addAP(100, 2000);
+    globalVar::user->showInfo();
+    // for (int i = 2; i <= 100000; ++i)
+        // globalVar::user->expUp(100);
+    // globalVar::user->setLevel(100);
+
+    globalVar::user->saveData();
 }

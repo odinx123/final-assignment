@@ -5,40 +5,45 @@
 #include <mutex>
 #include <thread>
 
-#include "global.h"
-#include "map.h"
+#include "C110152318_global.h"
+#include "C110152318_map.h"
 
-#define MAXATK 100
+#define MAXATK 100000
+#define SHOWATK 1500
 #define MAXDEF 100
-#define MAXBLOOD 10000
 
 static std::mutex s_mutex, mud1, mud2, mua1, mua2;
 
 class Job {
    private:
-    int HP;  // 血量
-    int AP;  // 傷害
-    int DF;  // 防禦
-    int curHP;
-    int curAP;
-    int curDF;
+    double HP;  // 血量
+    double AP;  // 傷害
+    double DF;  // 防禦
+    double curHP;
+    double curAP;
+    double curDF;
     int infoX;
     int infoY;
     std::atomic<bool> sdf1, sdf2, sap1, sap2;
     std::atomic<bool> df1, df2, ap1, ap2;
 
    public:
-    Job(int hp, int df, int ap);
+    Job(double hp, double df, double ap);
 
-    inline void upDef(int df);
-    inline void upHP(int hp);
-    inline void upAp(int ap);
-    inline void healHP(int heal);
+    inline void healHP(double heal);
     bool deHP(int atk);
-    inline void addDF(int df, int ms);
-    inline void subDF(int df, int ms);
-    inline void addAP(int ap, int ms);
-    inline void subAP(int ap, int ms);
+    inline void addDF(double df, int ms);
+    inline void subDF(double df, int ms);
+    inline void addAP(double ap, int ms);
+    inline void subAP(double ap, int ms);
+    // todo for equipment
+    double addDF(double df);
+    double subDF(double df);
+    double addAP(double ap);
+    double subAP(double ap);
+    double subHP(double hp);
+    double addHP(double hp);
+    // todo
     inline void showHP();
     inline void showDF();
     inline void showAP();
@@ -48,38 +53,36 @@ class Job {
     inline void clearSubAP();
     inline void clearAddDF();
     inline void clearAddAP();
-    int getHP() const { return HP; }
-    int getDF() const { return DF; }
-    int getAP() const { return AP; }
-    int getCurHP() const { return curHP; }
-    int getCurAP() const { return curAP; }
-    int getCurDF() const { return curDF; }
-    void setCurHP(SHORT curhp) { curHP = curhp; }
-    void setCurDF(SHORT curdf) { curDF = curdf; }
-    void setCurAP(SHORT curap) { curAP = curap; }
-    void to_json(nlohmann::json& j);
-
-   protected:
+    double getHP() const { return HP; }
+    double getDF() const { return DF; }
+    double getAP() const { return AP; }
+    double getCurHP() const { return curHP; }
+    double getCurAP() const { return curAP; }
+    double getCurDF() const { return curDF; }
+    void setCurHP(double curhp) { curHP = curhp; }
+    void setCurDF(double curdf) { curDF = curdf; }
+    void setCurAP(double curap) { curAP = curap; }
     void showAllInfo(SHORT x = 27, SHORT y = 1);
 
    private:
-    void conAddDF(int df, int ms);
-    void conSubDF(int df, int ms);
-    void conAddAP(int ap, int ms);
-    void conSubAP(int ap, int ms);
+    void conAddDF(double df, int ms);
+    void conSubDF(double df, int ms);
+    void conAddAP(double ap, int ms);
+    void conSubAP(double ap, int ms);
     void showbloodImg();
     void showDefImg();
     void showAtkImg();
 };
 
-Job::Job(int hp, int df, int ap) {
+Job::Job(double hp, double df, double ap) {
     curHP = HP = hp;
     curDF = DF = df;
     curAP = AP = ap;
+    df1 = df2 = ap1 = ap2 = false;
     sdf1 = sdf2 = sap1 = sap2 = true;
 }
 
-void Job::healHP(int heal) {
+void Job::healHP(double heal) {
     curHP = (curHP + heal > HP) ? HP : curHP + heal;
 }
 
@@ -93,17 +96,17 @@ bool Job::deHP(int atk) {
     return true;
 }
 
-void Job::addDF(int df, int ms) {
+void Job::addDF(double df, int ms) {
     std::thread t(&Job::conAddDF, this, df, ms);
     t.detach();
 }
 
-void Job::subDF(int df, int ms) {
+void Job::subDF(double df, int ms) {
     std::thread t(&Job::conSubDF, this, df, ms);
     t.detach();
 }
 
-void Job::conAddDF(int df, int ms) {
+void Job::conAddDF(double df, int ms) {
     df1 = true;
     std::lock_guard<std::mutex> lk(mud1);
     int gap;
@@ -123,7 +126,7 @@ void Job::conAddDF(int df, int ms) {
     df1 = false;
 }
 
-void Job::conSubDF(int df, int ms) {
+void Job::conSubDF(double df, int ms) {
     df2 = true;
     std::lock_guard<std::mutex> lk(mud2);
     int gap;
@@ -143,17 +146,17 @@ void Job::conSubDF(int df, int ms) {
     df2 = false;
 }
 
-void Job::addAP(int ap, int ms) {
+void Job::addAP(double ap, int ms) {
     std::thread t(&Job::conAddAP, this, ap, ms);
     t.detach();
 }
 
-void Job::subAP(int ap, int ms) {
+void Job::subAP(double ap, int ms) {
     std::thread t(&Job::conSubAP, this, ap, ms);
     t.detach();
 }
 
-void Job::conAddAP(int ap, int ms) {
+void Job::conAddAP(double ap, int ms) {
     ap1 = true;
     std::lock_guard<std::mutex> lk(mua1);
     int gap;
@@ -173,7 +176,7 @@ void Job::conAddAP(int ap, int ms) {
     ap1 = false;
 }
 
-void Job::conSubAP(int ap, int ms) {
+void Job::conSubAP(double ap, int ms) {
     ap2 = true;
     std::lock_guard<std::mutex> lk(mua2);
     int gap;
@@ -193,34 +196,19 @@ void Job::conSubAP(int ap, int ms) {
     ap2 = false;
 }
 
-void Job::upDef(int df) {
-    curDF = DF += df;
-    showAllInfo();
-}
-
-void Job::upHP(int hp) {
-    curHP = HP += hp;
-    showAllInfo();
-}
-
-void Job::upAp(int ap) {
-    curAP = AP += ap;
-    showAllInfo();
-}
-
 void Job::showHP() {
     globalVar::screen->clearMes(infoX, infoY, 20);
-    globalVar::screen->setMes("血量: " + std::to_string(curHP) + '/' + std::to_string(HP), infoX, infoY + 1);
+    globalVar::screen->setMes("血量: " + std::to_string(int(curHP)) + '/' + std::to_string(int(HP)), infoX, infoY + 1);
 }
 
 void Job::showDF() {
     globalVar::screen->clearMes(infoX, infoY + 2, 20);
-    globalVar::screen->setMes("防禦: " + std::to_string(curDF) + " %", infoX, infoY + 2);
+    globalVar::screen->setMes("防禦: " + std::to_string(int(curDF)) + " %", infoX, infoY + 2);
 }
 
 void Job::showAP() {
     globalVar::screen->clearMes(infoX, infoY + 3, 20);
-    globalVar::screen->setMes("攻擊: " + std::to_string(curAP), infoX, infoY + 3);
+    globalVar::screen->setMes("攻擊: " + std::to_string(int(curAP)), infoX, infoY + 3);
 }
 
 void Job::setInfoPos(int x, int y) {
@@ -259,7 +247,7 @@ void Job::showDefImg() {
 
 void Job::showAtkImg() {
     int n = 0;
-    double t = static_cast<double>(curAP) / MAXATK * 10;
+    double t = static_cast<double>(curAP) / SHOWATK * 10;
     if (t < 1 && t > 0)
         n = 1;
     else if (t >= 1)
@@ -325,12 +313,59 @@ void Job::clearAddAP() {
     sap1 = true;
 }
 
-void Job::to_json(nlohmann::json& j) {
-    j = nlohmann::json{
-        {"HP", HP},
-        {"DF", DF},
-        {"AP", AP},
-    };
+double Job::addDF(double df) {
+    double gap = df;
+    if (DF + df > MAXDEF) {
+        gap = MAXDEF - DF;
+        DF = curDF = MAXDEF;
+    } else
+        curDF = DF += df;
+    return gap;
+}
+
+double Job::subDF(double df) {
+    double gap = df;
+    if (DF - df < 0) {
+        gap = DF;
+        DF = curDF = 0;
+    } else
+        curDF = DF -= df;
+    return gap;
+}
+
+double Job::addAP(double ap) {
+    double gap = ap;
+    if (AP + ap > MAXATK) {
+        gap = MAXATK - AP;
+        AP = curAP = MAXATK;
+    } else
+        curAP = AP += ap;
+    return gap;
+}
+
+double Job::subAP(double ap) {
+    int gap = ap;
+    if (AP - ap < 0) {
+        gap = AP;
+        AP = curAP = 0;
+    } else
+        curAP = AP += ap;
+    return gap;
+}
+
+double Job::subHP(double hp) {
+    int gap = hp;
+    if (AP - hp <= 0) {
+        gap = AP-1;
+        AP = curAP = 1;
+    } else
+        curAP = AP += hp;
+    return gap;
+}
+
+double Job::addHP(double hp) {
+    curHP = HP += hp;
+    return hp;
 }
 
 #endif

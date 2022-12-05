@@ -13,10 +13,6 @@ int main() {
 
     while (true) {
         if (_kbhit()) {
-            GetConsoleScreenBufferInfo(stdBuf, &info);
-            SetConsoleCursorPosition(stdBuf, {0, 0});
-            cout << string(info.dwSize.X, ' ');
-            SetConsoleCursorPosition(stdBuf, {0, 0});
             cout << _getch() << endl;
         }
         setfps(60);

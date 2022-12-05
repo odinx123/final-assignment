@@ -4,7 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "map.h"
+#include "C110152318_map.h"
+#include "C110152318_bag.h"
 
 typedef int (*insFun)(const std::vector<std::string>&);
 
@@ -20,7 +21,17 @@ class Instruction {
 };
 
 int funcExit(const std::vector<std::string>& tokens) {
+    globalVar::user->saveData();
     return -1;
+}
+
+int funcSave(const std::vector<std::string>& tokens) {
+    globalVar::user->saveData();
+    globalVar::screen->clearMes(0, 0, 30);
+    globalVar::screen->setColor(10);
+    globalVar::screen->setMes("Already save data.", 0, 0);
+    globalVar::screen->setColor();
+    return 0;
 }
 
 int funcMove(const std::vector<std::string>& tokens) {
@@ -73,9 +84,46 @@ int funcMove(const std::vector<std::string>& tokens) {
     return 0;
 }
 
+int funcShop(const std::vector<std::string>& tokens) {
+    if (globalVar::screen->getCurCity() != "market") {
+        globalVar::screen->clearMes(0, 0, 30);
+        globalVar::screen->setColor(4);
+        globalVar::screen->setMes("you can't buy things here!!!", 0, 0);
+        globalVar::screen->setColor();
+        return 1;
+    }
+    globalVar::screen->printMapMes("Shop List:");
+    globalVar::bg->showShopList();
+
+    std::string ins;
+    globalVar::screen->setCursorVisible(true);
+    auto orgPos = globalVar::screen->getCurMesPos();
+    (std::cin >> ins).get();
+    globalVar::screen->clearMes(orgPos.X, orgPos.Y, 10);
+    globalVar::screen->setCursorVisible(false);
+    if (ins.size() == 0 || ins == "exit")
+        return 0;
+    
+    globalVar::bg->buy(stoi(ins));
+    globalVar::screen->printMapMes(" ");
+
+    return 0;
+}
+
+int funcShowBag(const std::vector<std::string>& tokens) {
+    globalVar::screen->printMapMes("Bag List:");
+    globalVar::bg->showBagList();
+    globalVar::screen->printMapMes(" ");
+
+    return 0;
+}
+
 Instruction::Instruction() {
     funcMap["exit"] = reinterpret_cast<void*>(funcExit);
     funcMap["move"] = reinterpret_cast<void*>(funcMove);
+    funcMap["save"] = reinterpret_cast<void*>(funcSave);
+    funcMap["shop"] = reinterpret_cast<void*>(funcShop);
+    funcMap["bag"] = reinterpret_cast<void*>(funcShowBag);
 }
 
 int Instruction::insertCommand() {
