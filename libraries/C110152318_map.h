@@ -241,14 +241,16 @@ void Map::showMap(uodMap_sb& hash_, std::string name, SHORT x, SHORT y) {
 void Map::setMes(const std::string& mes, SHORT x, SHORT y) {
     auto orgPos = getCursorPos();
     setInfoCursorPos(x, y);
-    std::cout << mes;
+    WriteConsole(stdBuf, mes.c_str(), mes.size(), nullptr, nullptr);
+    // std::cout << mes;
     setStdCursorPos(orgPos.X, orgPos.Y);
 }
 
 void Map::clearMes(SHORT x, SHORT y, SHORT size_) {
     auto orgPos = getCursorPos();
     setStdCursorPos(x, y + height + 1);
-    std::cout << std::string(size_, ' ');
+    // std::cout << std::string(size_, ' ');
+    WriteConsole(stdBuf, std::string(size_, ' ').c_str(), size_, nullptr, nullptr);
     setStdCursorPos(orgPos.X, orgPos.Y);
 }
 

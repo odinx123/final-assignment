@@ -36,13 +36,16 @@ class Job {
     inline void subDF(double df, int ms);
     inline void addAP(double ap, int ms);
     inline void subAP(double ap, int ms);
-    // todo for equipment
     double addDF(double df);
     double subDF(double df);
     double addAP(double ap);
     double subAP(double ap);
     double subHP(double hp);
     double addHP(double hp);
+    // todo
+    inline void chCurDF(double df);
+    inline void chCurAP(double ap);
+    inline void chCurHP(double hp);
     // todo
     inline void showHP();
     inline void showDF();
@@ -62,7 +65,7 @@ class Job {
     void setCurHP(double curhp) { curHP = curhp; }
     void setCurDF(double curdf) { curDF = curdf; }
     void setCurAP(double curap) { curAP = curap; }
-    void showAllInfo(SHORT x = 27, SHORT y = 1);
+    void showAllInfo(SHORT x = 27, SHORT y = 3);
 
    private:
     void conAddDF(double df, int ms);
@@ -108,7 +111,7 @@ void Job::subDF(double df, int ms) {
 
 void Job::conAddDF(double df, int ms) {
     df1 = true;
-    std::lock_guard<std::mutex> lk(mud1);
+    // std::lock_guard<std::mutex> lk(mud1);
     int gap;
     if (curDF + df > MAXDEF) {
         gap = MAXDEF - curDF;
@@ -117,18 +120,18 @@ void Job::conAddDF(double df, int ms) {
         gap = df;
         curDF += df;
     }
-    showAllInfo();
+    // showAllInfo();
     auto start = std::chrono::system_clock::now();
     while (sdf1 && ((std::chrono::system_clock::now() - start).count() / 1000000.f < ms))
         std::this_thread::yield();
     curDF -= gap;
-    showAllInfo();
+    // showAllInfo();
     df1 = false;
 }
 
 void Job::conSubDF(double df, int ms) {
     df2 = true;
-    std::lock_guard<std::mutex> lk(mud2);
+    // std::lock_guard<std::mutex> lk(mud2);
     int gap;
     if (curDF - df < 0) {
         gap = curDF;
@@ -137,12 +140,12 @@ void Job::conSubDF(double df, int ms) {
         gap = df;
         curDF -= df;
     }
-    showAllInfo();
+    // showAllInfo();
     auto start = std::chrono::system_clock::now();
     while (sdf2 && ((std::chrono::system_clock::now() - start).count() / 1000000.f < ms))
         std::this_thread::yield();
     curDF += gap;
-    showAllInfo();
+    // showAllInfo();
     df2 = false;
 }
 
@@ -158,7 +161,7 @@ void Job::subAP(double ap, int ms) {
 
 void Job::conAddAP(double ap, int ms) {
     ap1 = true;
-    std::lock_guard<std::mutex> lk(mua1);
+    // std::lock_guard<std::mutex> lk(mua1);
     int gap;
     if (curAP + ap > MAXATK) {
         gap = MAXATK - curAP;
@@ -167,18 +170,18 @@ void Job::conAddAP(double ap, int ms) {
         gap = ap;
         curAP += ap;
     }
-    showAllInfo();
+    // showAllInfo();
     auto start = std::chrono::system_clock::now();
     while (sap1 && ((std::chrono::system_clock::now() - start).count() / 1000000.f < ms))
         std::this_thread::yield();
     curAP -= gap;
-    showAllInfo();
+    // showAllInfo();
     ap1 = false;
 }
 
 void Job::conSubAP(double ap, int ms) {
     ap2 = true;
-    std::lock_guard<std::mutex> lk(mua2);
+    // std::lock_guard<std::mutex> lk(mua2);
     int gap;
     if (curAP - ap < 0) {
         gap = curAP;
@@ -187,28 +190,31 @@ void Job::conSubAP(double ap, int ms) {
         gap = ap;
         curAP -= ap;
     }
-    showAllInfo();
+    // showAllInfo();
     auto start = std::chrono::system_clock::now();
     while (sap2 && ((std::chrono::system_clock::now() - start).count() / 1000000.f < ms))
         std::this_thread::yield();
     curAP += gap;
-    showAllInfo();
+    // showAllInfo();
     ap2 = false;
 }
 
 void Job::showHP() {
-    globalVar::screen->clearMes(infoX, infoY, 20);
-    globalVar::screen->setMes("血量: " + std::to_string(int(curHP)) + '/' + std::to_string(int(HP)), infoX, infoY + 1);
+    // globalVar::screen->clearMes(infoX, infoY, 20);
+    globalVar::screen->setMes(
+        "血量: " + std::to_string(int(curHP)) + '/' + std::to_string(int(HP))+std::string(7, ' '), infoX, infoY + 1);
 }
 
 void Job::showDF() {
-    globalVar::screen->clearMes(infoX, infoY + 2, 20);
-    globalVar::screen->setMes("防禦: " + std::to_string(int(curDF)) + " %", infoX, infoY + 2);
+    // globalVar::screen->clearMes(infoX, infoY + 2, 20);
+    globalVar::screen->setMes(
+        "防禦: " + std::to_string(int(curDF)) + " %" + std::string(7, ' '), infoX, infoY + 2);
 }
 
 void Job::showAP() {
-    globalVar::screen->clearMes(infoX, infoY + 3, 20);
-    globalVar::screen->setMes("攻擊: " + std::to_string(int(curAP)), infoX, infoY + 3);
+    // globalVar::screen->clearMes(infoX, infoY + 3, 20);
+    globalVar::screen->setMes(
+        "攻擊: " + std::to_string(int(curAP)) + std::string(7, ' '), infoX, infoY + 3);
 }
 
 void Job::setInfoPos(int x, int y) {
@@ -217,7 +223,9 @@ void Job::setInfoPos(int x, int y) {
 }
 
 void Job::showbloodImg() {
-    int n = int(static_cast<double>(curHP) / HP * 10) % 11;
+    int n = int(static_cast<double>(curHP) / HP * 10);
+    n = (n > 10) ? 10 : n;
+    n = (n < 1) ? 1 : n;
     globalVar::screen->setInfoCursorPos(infoX, infoY + 5);
     globalVar::screen->setColor(4);
     for (int i = 0; i < n; ++i)
@@ -272,6 +280,7 @@ void Job::showAllInfo(SHORT x, SHORT y) {
     showbloodImg();
     showDefImg();
     showAtkImg();
+    globalVar::screen->setStdCursorPos(0, 0);
 }
 
 void Job::clearAllStatus() {
@@ -355,17 +364,32 @@ double Job::subAP(double ap) {
 
 double Job::subHP(double hp) {
     int gap = hp;
-    if (AP - hp <= 0) {
+    if (HP - hp <= 0) {
         gap = AP-1;
-        AP = curAP = 1;
+        HP = curHP = 1;
     } else
-        curAP = AP += hp;
+        curHP = HP += hp;
     return gap;
 }
 
 double Job::addHP(double hp) {
     curHP = HP += hp;
     return hp;
+}
+
+void Job::chCurDF(double df) {
+    curDF += df;
+    DF += df;
+}
+
+void Job::chCurAP(double ap) {
+    curAP += ap;
+    AP += ap;
+}
+
+void Job::chCurHP(double hp) {
+    HP += hp;
+    curHP += hp;
 }
 
 #endif

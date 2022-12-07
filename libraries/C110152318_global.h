@@ -16,7 +16,8 @@ namespace globalVar {
     std::ifstream file_in;
     std::ofstream file_out;
     std::stringstream stream;
-    
+    nlohmann::json jin;
+
     // class
     User* user = nullptr;
     Map* screen = nullptr;

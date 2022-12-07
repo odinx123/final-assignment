@@ -15,28 +15,17 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using namespace std;
 
-class a {
-    public:
-    int a = 5;
-};
-
-class b {
-    public:
-    int a = 6;
-};
-
 int main() {
-    unsigned int i = 0xed;
-    auto a = i;
-    // cout << hex << a << endl;
-    i = (i^0x20);
-    cout << hex << a << " " << i << endl;
-    cout << hex << (i&a) << endl;
-    // User user;
-    // globalVar::user = new User;
-    // cout << getNumberSize(500002);
+    std::string path = "D:\\Programming\\final\\final-assignment";
+    ifstream file_in(path+"\\player\\test.json");
+    nlohmann::json j;
 
-    // auto a = getClassp(1);
+    file_in >> j;
+    cout << j.dump(4) << endl;
+
+    // for (const auto& o : j) {
+    //     cout << o << " " << o.value() << endl;
+    // }
 
     system("pause");
     return 0;

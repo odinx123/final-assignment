@@ -38,6 +38,9 @@ int main() {
                     break;
             }
         }
+        globalVar::bg->saveBagItem();
+        globalVar::user->saveData();  // bug
+        globalVar::user->showInfo();
         setfps(60);
     }
     
@@ -47,14 +50,14 @@ int main() {
 }
 
 void initializeGame() {
-    globalVar::user = new User;
     globalVar::Command = new Instruction;
+    globalVar::user = new User;
     globalVar::bg = new Bag;
     globalVar::screen->setConsoleName(L"C110152318期末作業⚔⛊");
 
     globalVar::user->showInfo();
-    // for (int i = 2; i <= 100000; ++i)
-        // globalVar::user->expUp(100);
+    // for (int i = 2; i <= 1000; ++i)
+    //     globalVar::user->expUp(100);
     // globalVar::user->setLevel(100);
 
     globalVar::user->saveData();

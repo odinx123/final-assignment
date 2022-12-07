@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "C110152318_map.h"
 #include "C110152318_bag.h"
+#include "C110152318_map.h"
 
 typedef int (*insFun)(const std::vector<std::string>&);
 
@@ -18,27 +18,28 @@ class Instruction {
 
     int insertCommand();
     void splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c);
+    void printConmand() const;
 };
+
+inline void printMes(const std::string& mes, SHORT x, SHORT y, int color);
 
 int funcExit(const std::vector<std::string>& tokens) {
     globalVar::user->saveData();
+    globalVar::bg->saveBagItem();
     return -1;
 }
 
 int funcSave(const std::vector<std::string>& tokens) {
     globalVar::user->saveData();
+    globalVar::bg->saveBagItem();
     globalVar::screen->clearMes(0, 0, 30);
-    globalVar::screen->setColor(10);
-    globalVar::screen->setMes("Already save data.", 0, 0);
-    globalVar::screen->setColor();
+    printMes("Already save data.", 0, 0, 10);
     return 0;
 }
 
 int funcMove(const std::vector<std::string>& tokens) {
     if (tokens.size() != 1 && tokens.size() != 2) {
-        globalVar::screen->setColor(4);
-        globalVar::screen->setMes("指令錯誤!!!", 0, 0);
-        globalVar::screen->setColor();
+        printMes("指令錯誤!!!", 0, 0, 4);
         return 1;
     }
 
@@ -54,31 +55,25 @@ int funcMove(const std::vector<std::string>& tokens) {
         (std::cin >> i).get();
         globalVar::screen->setCursorVisible(false);
 
-        if (std::cin.fail()) {
-            globalVar::screen->setColor(4);
-            globalVar::screen->setMes("This map does not exist.", 0, 0);
-            globalVar::screen->setColor();
-        }
+        if (std::cin.fail())
+            printMes("This map does not exist.", 0, 0, 4);
 
         globalVar::screen->clearMes(0, 5, 10);
         globalVar::screen->clearMes(0, 4, mes.size());
 
         if (std::cin.fail()) {
-			fflush(stdin);
+            fflush(stdin);
             std::cin.clear();
             return 1;
         } else
             globalVar::screen->loadMap(globalVar::screen->getEngCityName(i));
     } else {
         try {
-        	globalVar::screen->loadMap(globalVar::screen->getEngCityName(std::stoi(tokens[1])));
+            globalVar::screen->loadMap(globalVar::screen->getEngCityName(std::stoi(tokens[1])));
         } catch (const std::invalid_argument& e) {
-            globalVar::screen->setColor(4);
-			globalVar::screen->setMes("This map does not exist.", 0, 0);
-            globalVar::screen->setColor();
+            printMes("This map does not exist.", 0, 0, 4);
             return 1;
         }
-
     }
 
     return 0;
@@ -87,9 +82,11 @@ int funcMove(const std::vector<std::string>& tokens) {
 int funcShop(const std::vector<std::string>& tokens) {
     if (globalVar::screen->getCurCity() != "market") {
         globalVar::screen->clearMes(0, 0, 30);
-        globalVar::screen->setColor(4);
-        globalVar::screen->setMes("you can't buy things here!!!", 0, 0);
-        globalVar::screen->setColor();
+        printMes("you can't buy things here!!!", 0, 0, 4);
+        return 1;
+    } else if (tokens.size() > 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
     globalVar::screen->printMapMes("Shop List:");
@@ -103,18 +100,92 @@ int funcShop(const std::vector<std::string>& tokens) {
     globalVar::screen->setCursorVisible(false);
     if (ins.size() == 0 || ins == "exit")
         return 0;
-    
-    globalVar::bg->buy(stoi(ins));
+
+    int index;
+    try {
+        index = stoi(ins);
+    } catch (const std::invalid_argument& e) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    // todo
+    auto state = globalVar::bg->buy(index);
+    if (state == 1) {
+        globalVar::screen->printMapMes("錢不夠購買" + globalVar::bg->getShopNameByIndex(index));
+        return 1;
+    } else if (state == 2) {
+        globalVar::screen->printMapMes("指令錯誤，請輸入數字!!!");
+        return 1;
+    } else if (state == 3) {
+        globalVar::screen->printMapMes("背包大小不足!!!");
+        return 1;
+    }
     globalVar::screen->printMapMes(" ");
 
     return 0;
 }
 
 int funcShowBag(const std::vector<std::string>& tokens) {
+    if (tokens.size() > 2) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
     globalVar::screen->printMapMes("Bag List:");
     globalVar::bg->showBagList();
     globalVar::screen->printMapMes(" ");
+    if (!globalVar::bg->isBagCanUse())
+        return 1;
 
+    if (tokens.size() == 2 && (tokens[1] == "use" || tokens[1] == "deuse")) {
+        std::string ins;
+        globalVar::screen->setCursorVisible(true);
+        auto orgPos = globalVar::screen->getCurMesPos();
+
+        int index;
+        (std::cin >> ins).get();
+        globalVar::screen->clearMes(orgPos.X, orgPos.Y, 10);
+        globalVar::screen->setCursorVisible(false);
+        try {
+            index = stoi(ins);
+        } catch (const std::invalid_argument& e) {
+            globalVar::screen->clearMes(0, 0, 30);
+            printMes("Command error!!!", 0, 0, 4);
+            return 1;
+        }
+
+        if (tokens[1] == "use") {
+            if (globalVar::user->ware && globalVar::bg->getTypeByIdx(index) == 1) {
+                globalVar::screen->clearMes(0, 0, 30);
+                printMes("請脫下裝備再穿著!!!", 0, 0, 4);
+                return 1;
+            }
+            auto t = globalVar::bg->useBagItem(index, true);
+        } else if (tokens[1] == "deuse") {
+            // bug
+            if (!globalVar::user->ware) {
+                globalVar::screen->clearMes(0, 0, 30);
+                printMes("未穿著裝備!!!", 0, 0, 4);
+                return 1;
+            }
+            auto t = globalVar::bg->useBagItem(index, false);
+        }
+    }
+
+    return 0;
+}
+
+int funcHelp(const std::vector<std::string>& tokens) {
+    if (tokens.size() > 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    globalVar::screen->printMapMes("Instruction List:");
+    globalVar::Command->printConmand();
     return 0;
 }
 
@@ -124,6 +195,7 @@ Instruction::Instruction() {
     funcMap["save"] = reinterpret_cast<void*>(funcSave);
     funcMap["shop"] = reinterpret_cast<void*>(funcShop);
     funcMap["bag"] = reinterpret_cast<void*>(funcShowBag);
+    funcMap["help"] = reinterpret_cast<void*>(funcHelp);
 }
 
 int Instruction::insertCommand() {
@@ -139,19 +211,17 @@ int Instruction::insertCommand() {
     std::vector<std::string> tokens;
     splitstring(sentense, tokens, " ");
     if (tokens.size() == 0) {
-		globalVar::screen->clearMes(0, 4, mes.size());
-		globalVar::screen->clearMes(0, 5, sentense.size());
+        globalVar::screen->clearMes(0, 4, mes.size());
+        globalVar::screen->clearMes(0, 5, sentense.size());
         globalVar::screen->setCursorVisible(false);
-		return 0;
-	}
+        return 0;
+    }
 
     auto it = funcMap.find(tokens[0]);
     if (it == funcMap.end()) {
-        globalVar::screen->setColor(4);
-        globalVar::screen->setMes("指令錯誤!!!", 0, 0);
-        globalVar::screen->setColor();
-		globalVar::screen->clearMes(0, 4, mes.size());
-    	globalVar::screen->clearMes(0, 5, sentense.size());
+        printMes("指令錯誤!!!", 0, 0, 4);
+        globalVar::screen->clearMes(0, 4, mes.size());
+        globalVar::screen->clearMes(0, 5, sentense.size());
         globalVar::screen->setCursorVisible(false);
         return 0;
     }
@@ -174,6 +244,17 @@ void Instruction::splitstring(const std::string& s, std::vector<std::string>& v,
     }
     if (pos1 != s.length())
         v.push_back(s.substr(pos1));
+}
+
+void Instruction::printConmand() const {
+    for (const auto& s : funcMap)
+        globalVar::screen->printMapMes("\t\t" + s.first);
+}
+
+void printMes(const std::string& mes, SHORT x, SHORT y, int color) {
+    globalVar::screen->setColor(color);
+    globalVar::screen->setMes(mes, x, y);
+    globalVar::screen->setColor();
 }
 
 #endif
