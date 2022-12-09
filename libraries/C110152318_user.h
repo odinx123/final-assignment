@@ -29,6 +29,7 @@ class User {
     std::string path;
     double needEXP = 10;
     double coin;
+    bool live = true;
 
    public:
     JobComb* jb = nullptr;
@@ -54,6 +55,9 @@ class User {
     double getCoin() const { return coin; }
     void changeCoin(double m) { coin += m; }
     std::string getCurId() const { return ID; }
+    std::string getCurJob() const { return number; }
+    bool isLive() const { return live; }
+    void setLive(bool s) { live = s; }
 };
 
 User::User() {
@@ -132,6 +136,12 @@ void User::login() {
     globalVar::screen->loadMap(tempCityName);
     globalVar::screen->showMap(90, 1);
     globalVar::screen->setCursorVisible(false);
+    if (globalVar::jin["account"][ID]["job"][number]["live"] == false) {
+        live = true;
+        jb->healHP(1);
+        globalVar::screen->printMapMes("【 已經復活 】");
+        globalVar::screen->printMapMes(" ");
+    }
 }
 
 void User::waitAni(const std::string& mes) const {
@@ -183,6 +193,7 @@ void User::saveData() {
     userID["money"] = coin;
 
     userID["job"][number] = nlohmann::json{
+        {"live", live},
         {"EXP", EXP},
         {"level", level},
         {"needEXP", needEXP},

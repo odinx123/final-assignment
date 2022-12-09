@@ -6,5 +6,8 @@
 #include "C110152318_instruction.h"
 #include "C110152318_jobcomb.h"
 #include "C110152318_global.h"
+#include "C110152318_monster.h"
+#include "C110152318_monstData.h"
+#include "C110152318_fight.h"
 
 #endif

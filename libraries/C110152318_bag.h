@@ -134,8 +134,12 @@ void Bag::saveBagItem() {
     userBag = nlohmann::json{
         {"objNum", globalVar::bg->getObjNum()},
         {"bagNum", globalVar::bg->getBagNum()},
-        {"wareNumber", globalVar::user->wareNumber},
     };
+
+    if (globalVar::user->ware) {
+        bagList[globalVar::user->wareNumber].second->useBagObj(false);
+        ++bagList[globalVar::user->wareNumber].first;
+    }
 
     for (const auto& o : bagList)
         userBag[std::to_string(o.first)] = o.second.first;
@@ -152,8 +156,8 @@ void Bag::eraseBagItemFromData(int idx) {
 
 // todo  chagne job ware equip.
 void Bag::loadBagItem() {
-    auto& userBag = globalVar::jin["account"][globalVar::user->getCurId()]["bag"];
-    for (const auto& o : userBag.items()) {
+    auto& userID = globalVar::jin["account"][globalVar::user->getCurId()];
+    for (const auto& o : userID["bag"].items()) {
         if (o.key() == "bagNum")
             bagNum = o.value();
         else if (o.key() == "objNum")

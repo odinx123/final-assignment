@@ -2,11 +2,12 @@
 #define FUNCTION_H 1
 
 #include <io.h>
+
 #include <cstdlib>
-#include <string>
-#include <vector>
 #include <cstring>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 void get_path(std::string& path);
 void getFiles(const std::string& path, std::vector<std::string>& files);
@@ -24,9 +25,9 @@ void get_path(std::string& path) {
 }
 
 void getFiles(const std::string& path, std::vector<std::string>& files) {
-    //文件句柄
+    // 文件句柄
     long hFile = 0;
-    //文件信息
+    // 文件信息
     _finddata_t fileinfo;
     std::string p;
     if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(), &fileinfo)) != -1) {

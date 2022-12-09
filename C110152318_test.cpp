@@ -1,31 +1,24 @@
+#include <stdio.h>
 #include <windows.h>
+#include <vector>
 
-#include <atomic>
-#include <chrono>
 #include <iostream>
-#include <mutex>
-#include <nlohmann/json.hpp>
-#include <string>
-#include <thread>
-#include <iomanip>
-
-#include "libraries/C110152318_function.h"
-#include "libraries/C110152318_user.h"
-using std::chrono::milliseconds;
-using std::chrono::seconds;
 using namespace std;
 
-int main() {
-    std::string path = "D:\\Programming\\final\\final-assignment";
-    ifstream file_in(path+"\\player\\test.json");
-    nlohmann::json j;
+int main(void) {
+    vector<int> arr;
+    for (int i = 0; i < 10; ++i)
+        arr.emplace_back(i);
+    
+    for (const auto& i : arr)
+        cout << i << " ";
+    cout << endl;
 
-    file_in >> j;
-    cout << j.dump(4) << endl;
+    arr.erase(arr.begin() + 4);
 
-    // for (const auto& o : j) {
-    //     cout << o << " " << o.value() << endl;
-    // }
+    for (const auto& i : arr)
+        cout << i << " ";
+    cout << endl;
 
     system("pause");
     return 0;

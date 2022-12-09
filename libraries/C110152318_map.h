@@ -118,6 +118,7 @@ void Map::loadMap(const std::string& name) {
         return;
     }
     curCity = name;
+    globalVar::genMons = true;
     clearMap();
     clearMes(0, 0, 30);
     clearMes(0, 1, 27);
@@ -352,7 +353,7 @@ void Map::printMapMes(const std::string& mes) {
     }
     auto curPos = getCursorPos();
     setStdCursorPos(curPos.X, curPos.Y);
-    std::cout << std::string(getConsoleWidth(), ' ');
+    std::cout << std::string(getConsoleWidth(), ' ');  // bug
     setStdCursorPos(curPos.X, curPos.Y);
     WriteConsole(stdBuf, mes.c_str(), mes.size(), nullptr, nullptr);
     mapPos.X = 0;

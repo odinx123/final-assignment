@@ -31,7 +31,8 @@ class Job {
     Job(double hp, double df, double ap);
 
     inline void healHP(double heal);
-    bool deHP(int atk);
+    // return false if die.
+    double deHP(double atk);
     inline void addDF(double df, int ms);
     inline void subDF(double df, int ms);
     inline void addAP(double ap, int ms);
@@ -89,14 +90,12 @@ void Job::healHP(double heal) {
     curHP = (curHP + heal > HP) ? HP : curHP + heal;
 }
 
-bool Job::deHP(int atk) {
+double Job::deHP(double atk) {
     atk = round(atk * (1 - (double)curDF / MAXDEF));
-    if (curHP - atk <= 0) {
-        curHP = 0;
-        return false;
-    }
     curHP -= atk;
-    return true;
+    if (curHP < 0)
+        curHP = 0;
+    return atk;
 }
 
 void Job::addDF(double df, int ms) {
@@ -225,7 +224,7 @@ void Job::setInfoPos(int x, int y) {
 void Job::showbloodImg() {
     int n = int(static_cast<double>(curHP) / HP * 10);
     n = (n > 10) ? 10 : n;
-    n = (n < 1) ? 1 : n;
+    n = (n < 1 && curHP > 0) ? 1 : n;
     globalVar::screen->setInfoCursorPos(infoX, infoY + 5);
     globalVar::screen->setColor(4);
     for (int i = 0; i < n; ++i)
@@ -390,6 +389,8 @@ void Job::chCurAP(double ap) {
 void Job::chCurHP(double hp) {
     HP += hp;
     curHP += hp;
+    if (curHP <= 0)
+        curHP = 1;
 }
 
 #endif

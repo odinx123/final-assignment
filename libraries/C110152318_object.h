@@ -30,7 +30,6 @@ class Object {
     int getIdx() const { return idx; }
     // 0 for eat, 1 for use.
     int getType() const { return type; }
-    nlohmann::json getAllInfo(int number) const;
 };
 
 Object::Object(const std::string& s, int hp, int df, int ap, int t, int c, int ty, int id)
@@ -79,9 +78,9 @@ int Object::useObj() {
         globalVar::user->jb->addAP(addAP, ms);
     globalVar::screen->printMapMes("你吃下了了<" + name + ">");
     globalVar::screen->printMapMes(
-        "<HP:" + std::to_string(addHP) + " " +
-        "AP:" + std::to_string(addAP) + " " +
-        "DF:" + std::to_string(addDF) + ">\t改變" + std::to_string(ms/1000)+"秒");
+        "HP:" + std::to_string(addHP) + "\t" +
+        "<AP:" + std::to_string(addAP) + " " +
+        "DF:" + std::to_string(addDF) + "  改變" + std::to_string(ms/1000)+"秒>");
     globalVar::user->showInfo();
     return type;
 }
@@ -91,21 +90,6 @@ int Object::useBagObj(bool s) {
     if (type) wareObj(s);
     else if (s) useObj();
     return type;
-}
-
-nlohmann::json Object::getAllInfo(int number) const {
-    return nlohmann::json{
-        {"number", number},
-        {"name", name},
-        {"addHP", addHP},
-        {"addDF", addDF},
-        {"addAP", addAP},
-        {"addHP", addHP},
-        {"ms", ms},
-        {"coin", coin},
-        {"type", type},
-        {"idx", idx}
-    };
 }
 
 #endif

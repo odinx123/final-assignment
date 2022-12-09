@@ -1,7 +1,7 @@
 #include <conio.h>
 #include <iostream>
 #include <windows.h>
-#include "libraries/function.h"
+// #include "libraries/function.h"
 using namespace std;
 
 
@@ -15,7 +15,7 @@ int main() {
         if (_kbhit()) {
             cout << _getch() << endl;
         }
-        setfps(60);
+        // setfps(60);
     }
 
     return 0;
