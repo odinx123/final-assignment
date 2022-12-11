@@ -92,12 +92,19 @@ int funcShop(const std::vector<std::string>& tokens) {
     }
     globalVar::screen->printMapMes("Shop List:");
     globalVar::bg->showShopList();
+    globalVar::screen->printMapMes(" ");
 
     std::string ins;
     globalVar::screen->setCursorVisible(true);
-    auto orgPos = globalVar::screen->getCurMesPos();
-    (std::cin >> ins).get();
-    globalVar::screen->clearMes(orgPos.X, orgPos.Y, 10);
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    if (ins.size() == 0) {
+        globalVar::screen->clearMes(0, 5, 10);
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    globalVar::screen->clearMes(0, 5, 10);
     globalVar::screen->setCursorVisible(false);
     if (ins.size() == 0 || ins == "exit")
         return 0;
@@ -115,13 +122,12 @@ int funcShop(const std::vector<std::string>& tokens) {
     auto state = globalVar::bg->buy(index);
     if (state == 1) {
         globalVar::screen->printMapMes("錢不夠購買" + globalVar::bg->getShopNameByIndex(index));
-        return 1;
     } else if (state == 2) {
         globalVar::screen->printMapMes("指令錯誤，請輸入數字!!!");
-        return 1;
     } else if (state == 3) {
         globalVar::screen->printMapMes("背包大小不足!!!");
-        return 1;
+    } else if (state == 4) {
+        globalVar::screen->printMapMes("職業不合，無法購買!!!");
     }
     globalVar::screen->printMapMes(" ");
 
@@ -142,13 +148,19 @@ int funcShowBag(const std::vector<std::string>& tokens) {
 
     if (tokens.size() == 2 && (tokens[1] == "use" || tokens[1] == "deuse")) {
         std::string ins;
-        globalVar::screen->setCursorVisible(true);
-        auto orgPos = globalVar::screen->getCurMesPos();
-
         int index;
-        (std::cin >> ins).get();
-        globalVar::screen->clearMes(orgPos.X, orgPos.Y, 10);
+
+        globalVar::screen->setInfoCursorPos(0, 5);
+        globalVar::screen->setCursorVisible(true);
+        std::getline(std::cin, ins);
         globalVar::screen->setCursorVisible(false);
+        globalVar::screen->clearMes(0, 5, 10);
+        if (ins.size() == 0) {
+            globalVar::screen->clearMes(0, 5, 10);
+            globalVar::screen->clearMes(0, 0, 30);
+            printMes("Command error!!!", 0, 0, 4);
+            return 1;
+        }
         try {
             index = stoi(ins);
         } catch (const std::invalid_argument& e) {
@@ -196,6 +208,8 @@ int funcMonsList(const std::vector<std::string>& tokens) {
         return 1;
     }
     // printMonstList
+    globalVar::screen->printMapMes("怪物資訊:");
+    globalVar::screen->printMapMes("數量: " + std::to_string(globalVar::monsterList.size()));
     for (const auto& m : globalVar::monsterList) {
         int size_ = gapSize_/3*2 - m->getMonstName().size()/3*2;
         int sizeHP = gapHP - getNumberSize(m->getCurHP_m())+2;
@@ -235,6 +249,77 @@ int funcFight(const std::vector<std::string>& tokens) {
     return 0;
 }
 
+int funcThrow(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    globalVar::screen->printMapMes("Bag List:");
+    globalVar::bg->showBagList();
+    globalVar::screen->printMapMes(" ");
+    if (!globalVar::bg->isBagCanUse())
+        return 1;
+    
+    std::string ins;
+    globalVar::screen->setCursorVisible(true);
+
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    if (ins.size() == 0) {
+        globalVar::screen->clearMes(0, 5, 10);
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    int index;
+    try {
+        index = stoi(ins);
+    } catch (const std::invalid_argument& e) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    globalVar::screen->clearMes(0, 5, 10);
+
+    globalVar::screen->setMes("你確定要丟棄這個物品?(y/n)\n", 0, 4);
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    if (ins.size() != 1) {
+        globalVar::screen->clearMes(0, 4, 30);
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    globalVar::screen->clearMes(0, 4, 30);
+    globalVar::screen->clearMes(0, 5, 10);
+
+    globalVar::screen->setCursorVisible(false);
+    if (ins == "N" || ins == "n" || ins == "no" || ins == "No") {
+        globalVar::screen->printMapMes("取消刪除裝備!!!");
+        return 1;
+    } else if (ins != "y" && ins != "Y" && ins != "yse" && ins != "Yes") {
+        globalVar::screen->printMapMes("輸入錯誤!!!");
+        return 1;
+    }
+
+    globalVar::bg->throwOut(index);
+
+    return 0;
+}
+
+int funcSkillUp(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    // if (globalVar::screen->getCurCity() != "skillShop")
+    return 0;
+}
+
 Instruction::Instruction() {
     funcMap["exit"] = reinterpret_cast<void*>(funcExit);
     funcMap["move"] = reinterpret_cast<void*>(funcMove);
@@ -242,8 +327,10 @@ Instruction::Instruction() {
     funcMap["shop"] = reinterpret_cast<void*>(funcShop);
     funcMap["bag"] = reinterpret_cast<void*>(funcShowBag);
     funcMap["help"] = reinterpret_cast<void*>(funcHelp);
-    funcMap["monsterList"] = reinterpret_cast<void*>(funcMonsList);
+    funcMap["ls"] = reinterpret_cast<void*>(funcMonsList);
     funcMap["fight"] = reinterpret_cast<void*>(funcFight);
+    funcMap["skill"] = reinterpret_cast<void*>(funcSkillUp);
+    funcMap["throw"] = reinterpret_cast<void*>(funcThrow);
 }
 
 int Instruction::insertCommand() {
@@ -296,7 +383,7 @@ void Instruction::splitstring(const std::string& s, std::vector<std::string>& v,
 
 void Instruction::printConmand() const {
     for (const auto& s : funcMap)
-        globalVar::screen->printMapMes("\t\t" + s.first);
+        globalVar::screen->printMapMes(std::string(8, ' ') + s.first);
 }
 
 void printMes(const std::string& mes, SHORT x, SHORT y, int color) {

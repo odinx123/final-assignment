@@ -9,13 +9,14 @@
 #include "C110152318_map.h"
 
 #define MAXATK 100000
-#define SHOWATK 1500
+#define SHOWATK 3000
 #define MAXDEF 100
 
 static std::mutex s_mutex, mud1, mud2, mua1, mua2;
 
 class Job {
    private:
+    double baseHP, baseDF, baseAP;
     double HP;  // 血量
     double AP;  // 傷害
     double DF;  // 防禦
@@ -63,10 +64,13 @@ class Job {
     double getCurHP() const { return curHP; }
     double getCurAP() const { return curAP; }
     double getCurDF() const { return curDF; }
+    double getBaseHP() const { return baseHP; }
+    double getBaseDF() const { return baseDF; }
+    double getBaseAP() const { return baseAP; }
     void setCurHP(double curhp) { curHP = curhp; }
     void setCurDF(double curdf) { curDF = curdf; }
     void setCurAP(double curap) { curAP = curap; }
-    void showAllInfo(SHORT x = 27, SHORT y = 3);
+    void showAllInfo(SHORT x = 27, SHORT y = 5);
 
    private:
     void conAddDF(double df, int ms);
@@ -79,9 +83,9 @@ class Job {
 };
 
 Job::Job(double hp, double df, double ap) {
-    curHP = HP = hp;
-    curDF = DF = df;
-    curAP = AP = ap;
+    baseHP = curHP = HP = hp;
+    baseDF = curDF = DF = df;
+    baseAP = curAP = AP = ap;
     df1 = df2 = ap1 = ap2 = false;
     sdf1 = sdf2 = sap1 = sap2 = true;
 }
@@ -325,9 +329,9 @@ double Job::addDF(double df) {
     double gap = df;
     if (DF + df > MAXDEF) {
         gap = MAXDEF - DF;
-        DF = curDF = MAXDEF;
+        baseDF = DF = curDF = MAXDEF;
     } else
-        curDF = DF += df;
+        baseDF = curDF = DF += df;
     return gap;
 }
 
@@ -335,9 +339,9 @@ double Job::subDF(double df) {
     double gap = df;
     if (DF - df < 0) {
         gap = DF;
-        DF = curDF = 0;
+        baseDF = DF = curDF = 0;
     } else
-        curDF = DF -= df;
+        baseDF = curDF = DF -= df;
     return gap;
 }
 
@@ -345,9 +349,9 @@ double Job::addAP(double ap) {
     double gap = ap;
     if (AP + ap > MAXATK) {
         gap = MAXATK - AP;
-        AP = curAP = MAXATK;
+        baseAP = AP = curAP = MAXATK;
     } else
-        curAP = AP += ap;
+        baseAP = curAP = AP += ap;
     return gap;
 }
 
@@ -355,9 +359,9 @@ double Job::subAP(double ap) {
     int gap = ap;
     if (AP - ap < 0) {
         gap = AP;
-        AP = curAP = 0;
+        baseAP = AP = curAP = 0;
     } else
-        curAP = AP += ap;
+        baseAP = curAP = AP += ap;
     return gap;
 }
 
@@ -365,14 +369,14 @@ double Job::subHP(double hp) {
     int gap = hp;
     if (HP - hp <= 0) {
         gap = AP-1;
-        HP = curHP = 1;
+        baseHP = HP = curHP = 1;
     } else
-        curHP = HP += hp;
+        baseHP = curHP = HP += hp;
     return gap;
 }
 
 double Job::addHP(double hp) {
-    curHP = HP += hp;
+    baseHP = curHP = HP += hp;
     return hp;
 }
 

@@ -23,6 +23,7 @@ namespace globalVar {
     bool gameState = true;
     std::vector<Monster*> monsterList;
     std::vector<double> chance_m;
+    int killNum = 0;
 
     // class
     User* user = nullptr;

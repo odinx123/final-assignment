@@ -26,10 +26,10 @@ JobComb::JobComb(double hp, double df, double ap, SHORT n) : Job(hp, df, ap) {
 }
 
 void JobComb::setLevelStatus() {
-    addHP(int(getHP()*0.1+100)*hpu[number]);
-    addAP((getAP()*0.1+100)*atk[number]);
+    addHP(int(getBaseHP()*0.1+100)*hpu[number]);
+    addAP((getBaseAP()*0.1+100)*atk[number]);
     
-    addDF((getDF()*0.1+50)*def[number]);
+    addDF((getBaseDF()*0.1+50)*def[number]);
 }
 
 #endif

@@ -31,6 +31,7 @@ class Map {
     nlohmann::json info;
     std::string path;
     std::string curCity;
+    std::string curCity_ch;
     COORD northPos;
     COORD westPos;
     COORD mapPos;
@@ -40,8 +41,12 @@ class Map {
     uodMap_is mapDictI2E;
     uodMap_is mapDictI2C;
     std::string tempCity;
-    std::vector<std::wstring> mapRam;
+    // std::vector<std::wstring> buffer;
+    std::vector<std::string> buffer;
     std::unordered_set<std::string> fileList;
+    CONSOLE_SCREEN_BUFFER_INFO size_S;
+    SHORT preHeight;
+    SHORT preWidth;
 
    public:
     Map(SHORT Height = 25, const std::string curm = "map01");
@@ -49,15 +54,15 @@ class Map {
     void loadMap(const std::string& name);
     inline void setStdCursorPos(SHORT x, SHORT y) const;
     inline void setCursorVisible(bool state) const;
-    inline SHORT getConsoleWidth() const;
-    inline SHORT getConsoleHeight() const;
+    inline SHORT getConsoleWidth();
+    inline SHORT getConsoleHeight();
     inline COORD getCursorPos() const;
     void setConsoleName(const std::wstring& name) const;
     void setColor(WORD color = 7) const;
-    void clearMap() const;
+    void clearMap();
     // EAST, WEST, NORTH, SOUTH
     inline void move(const std::string& dir);
-    void showMap(SHORT x, SHORT y);
+    void showMap(SHORT x = 90, SHORT y = 1);
     void setMes(const std::string& mes, SHORT x, SHORT y);
     void clearMes(SHORT x, SHORT y, SHORT size_);
     void setAllCity();
@@ -67,11 +72,14 @@ class Map {
     int getCityNum() const { return mapDictI2E.size(); }
     void showCityNumbering();
     std::string getCurCity() const { return curCity; }
+    std::string getCurCity_ch() const { return curCity_ch; }
     inline void putSaveScreen();
     inline void setToMapPos();
     void printMapMes(const std::string& mes);
     void saveScreen();
     inline COORD getCurMesPos() const;
+    inline void displayMap();
+    inline void clearAllMap();
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);
@@ -81,6 +89,8 @@ class Map {
 Map::Map(SHORT Height, const std::string curm) {
     height = Height;
     stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
+    // buffer.resize(getConsoleHeight(), std::wstring());
+    buffer.resize(getConsoleHeight(), std::string());
 
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
@@ -95,7 +105,8 @@ Map::Map(SHORT Height, const std::string curm) {
     globalVar::file_in >> info;
     globalVar::file_in.close();
 
-    mapRam.resize(getConsoleHeight(), std::wstring());
+    preHeight = getConsoleHeight();
+    preWidth = getConsoleWidth();
 
     // setAllCity();
     // loadMap(curm);
@@ -106,9 +117,6 @@ void Map::loadMap(const std::string& name) {
     std::string curMapFile = path + "\\" + name + ".txt";
     auto width = getConsoleWidth();
 
-    setStdCursorPos(0, height);
-    std::cout << std::string(width, '=');
-
     clearMes(0, 0, 30);
     if (fileList.count(curMapFile) <= 0) {
         setColor(4);
@@ -117,8 +125,11 @@ void Map::loadMap(const std::string& name) {
         setStdCursorPos(0, 0);
         return;
     }
+    for (auto& b : buffer)
+        b.clear();
     curCity = name;
     globalVar::genMons = true;
+    globalVar::killNum = 0;
     clearMap();
     clearMes(0, 0, 30);
     clearMes(0, 1, 27);
@@ -127,25 +138,19 @@ void Map::loadMap(const std::string& name) {
     std::string temp;
     globalVar::file_in.open(curMapFile);
     getline(globalVar::file_in, temp);
+    curCity_ch = temp;
 
-    if (temp.size() <= 18) {
-        WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
-        std::cout << temp;
-    }
-    else {
-        WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
-        std::cout << temp.substr(0, 18);
-    }
-    showMap(90, 1);
+    displayMap();
 
     setStdCursorPos(0, 0);
-    for (int i = 1; i < height && !globalVar::file_in.eof(); ++i) {
+    int i;
+    for (i = 1; i < height && !globalVar::file_in.eof(); ++i) {
         getline(globalVar::file_in, temp);
-        std::cout << temp << std::endl;
+        buffer[i-1] = temp + "\n";
+        std::cout << buffer[i-1];
     }
     mapPos = getCursorPos();
     ++mapPos.Y;
-    heightPos = getCursorPos().Y+1;
     globalVar::file_in.close();
     setStdCursorPos(0, 0);
 }
@@ -159,19 +164,17 @@ void Map::setCursorVisible(bool state) const {
     SetConsoleCursorInfo(stdBuf, &cci);
 }
 
-SHORT Map::getConsoleWidth() const {
-    CONSOLE_SCREEN_BUFFER_INFO size_;
-    GetConsoleScreenBufferInfo(stdBuf, &size_);
-    return size_.dwSize.X;
+SHORT Map::getConsoleWidth() {
+    GetConsoleScreenBufferInfo(stdBuf, &size_S);
+    return size_S.dwSize.X;
 }
 
-SHORT Map::getConsoleHeight() const {
-    CONSOLE_SCREEN_BUFFER_INFO size_;
-    GetConsoleScreenBufferInfo(stdBuf, &size_);
-    return size_.srWindow.Bottom;
+SHORT Map::getConsoleHeight() {
+    GetConsoleScreenBufferInfo(stdBuf, &size_S);
+    return size_S.srWindow.Bottom;
 }
 
-void Map::clearMap() const {
+void Map::clearMap() {
     setStdCursorPos(0, 0);
     SHORT width = getConsoleWidth();
     for (SHORT i = 0; i < height; ++i)
@@ -199,6 +202,7 @@ void Map::move(const std::string& dir) {
 
 void Map::showMap(SHORT x, SHORT y) {
     auto orgPos = getCursorPos();
+    x = getConsoleWidth() - 50;  // todo
     uodMap_sb hash_;
     showMap(hash_, westCity, x + 0, y + height + 1 + abs(westPos.Y - northPos.Y) * 2);
     setStdCursorPos(orgPos.X, orgPos.Y);
@@ -318,9 +322,11 @@ void Map::saveScreen() {
     DWORD bytes;
 
     for (SHORT i = 0; i < height; ++i) {
-        wchar_t* t = new wchar_t[w+1]();
-        ReadConsoleOutputCharacterW(stdBuf, t, w, {0, i}, &bytes);
-        mapRam[i] = t;
+        char* t = new char[w+1]();
+        ReadConsoleOutputCharacterA(stdBuf, t, w+1, {0, i}, &bytes);
+        t[w-1] = '\0';
+        t[w-2] = '\n';
+        buffer[i] = t;
         delete[] t;
     }
     SetConsoleCursorPosition(stdBuf, orgPos);
@@ -329,7 +335,8 @@ void Map::saveScreen() {
 void Map::putSaveScreen() {
     auto orgPos = getCursorPos();
     for (SHORT i = 0; i < height; ++i)
-        WriteConsoleW(stdBuf, mapRam[i].c_str(), mapRam[i].size(), nullptr, nullptr);
+        // std::cout << buffer[i];
+        WriteConsole(stdBuf, buffer[i].c_str(), buffer[i].size(), nullptr, nullptr);
     SetConsoleCursorPosition(stdBuf, orgPos);
 }
 
@@ -343,21 +350,25 @@ void Map::printMapMes(const std::string& mes) {
     if (mapPos.Y >= height) {
         mapPos.Y = height - 1;
         auto times = mes.size() / getConsoleWidth();
-        saveScreen();
         for (int j = 0; j <= times; ++j) {
             for (int i = 1; i < height; ++i) {
                 setStdCursorPos(0, i-1);
-                WriteConsoleW(stdBuf, mapRam[i].c_str(), mapRam[i].size(), nullptr, nullptr);
+                buffer[i-1] = buffer[i];
+                WriteConsole(stdBuf, buffer[i].c_str(), buffer[i].size(), nullptr, nullptr);
             }
         }
     }
     auto curPos = getCursorPos();
-    setStdCursorPos(curPos.X, curPos.Y);
-    std::cout << std::string(getConsoleWidth(), ' ');  // bug
-    setStdCursorPos(curPos.X, curPos.Y);
-    WriteConsole(stdBuf, mes.c_str(), mes.size(), nullptr, nullptr);
+    SHORT w = getConsoleWidth();
+    int yPos = curPos.Y;
+    if (yPos >= height) {
+        yPos = height-1;
+        setStdCursorPos(0, yPos);
+    }
+    buffer[yPos] = mes+std::string(w-mes.size()-1, ' ')+"\n";
+    WriteConsole(stdBuf, buffer[yPos].c_str(), w, nullptr, nullptr);
     mapPos.X = 0;
-    mapPos.Y = getCursorPos().Y+1;
+    mapPos.Y = getCursorPos().Y;
     SetConsoleCursorPosition(stdBuf, orgPos);
     Sleep(10);
 }
@@ -366,6 +377,40 @@ COORD Map::getCurMesPos() const {
     auto pos = getCursorPos();
     pos.Y -= height+1;
     return pos;
+}
+
+void Map::displayMap() {
+    setStdCursorPos(0, 0);
+    SHORT w = getConsoleWidth();
+    for (int i = 0; i < height; ++i) {
+        setStdCursorPos(0, i);
+        WriteConsole(stdBuf, buffer[i].c_str(), buffer[i].size(), nullptr, nullptr);
+    }
+    setStdCursorPos(0, height);
+    std::cout << std::string(getConsoleWidth(), '=');
+
+    setStdCursorPos(0, height + 2);
+    if (curCity_ch.size()/3*2 <= 18) {
+        WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
+        std::cout << curCity_ch;
+    }
+    else {
+        WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
+        std::cout << curCity_ch.substr(0, 18);
+    }
+    showMap();
+}
+
+void Map::clearAllMap() {
+    SHORT h = getConsoleHeight();
+    SHORT w = getConsoleWidth();
+    if (h == preHeight && w == preWidth) return;
+    setStdCursorPos(0, 0);
+    height = h - 14;
+    for (int i = 0; i <= h; ++i)
+        WriteConsole(stdBuf, std::string(w, ' ').c_str(), w, nullptr, nullptr);
+    preHeight = h;
+    preWidth = w;
 }
 
 #endif

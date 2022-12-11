@@ -1,32 +1,55 @@
 {
     "lobby": {
-        "east": "map02",
-        "north": "map01",
+        "east": "relayStation1",
+        "north": "null",
         "south": "market",
-        "west": "map03"
+        "west": "modernCity"
     },
-    "map01": {
+    "tower": {
         "east": "null",
         "north": "null",
-        "south": "lobby",
+        "south": "modernCity",
         "west": "null"
     },
-    "map02": {
-        "east": "null",
-        "north": "null",
-        "south": "null",
-        "west": "lobby"
-    },
-    "map03": {
+    "modernCity": {
         "east": "lobby",
-        "north": "null",
-        "south": "null",
+        "north": "tower",
+        "south": "LisaVillage",
         "west": "null"
+    },
+    "LisaVillage": {
+        "east": "null",
+        "north": "modernCity",
+        "south": "null",
+        "west": "desertTemple"
     },
     "market": {
         "east": "null",
         "north": "lobby",
         "south": "null",
         "west": "null"
+    },
+	"desertTemple": {
+        "east": "LisaVillage",
+        "north": "null",
+        "south": "null",
+        "west": "null"
+    },
+	"relayStation1": {
+        "east": "null",
+        "north": "relayStation2",
+        "south": "null",
+        "west": "lobby"
+    },
+	"relayStation2": {
+        "east": "DemonCity",
+        "north": "null",
+        "south": "relayStation1",
+        "west": "null"
+    },"DemonCity": {
+        "east": "null",
+        "north": "null",
+        "south": "null",
+        "west": "relayStation2"
     }
 }

@@ -13,8 +13,8 @@ class Monster : private Job {
     Monster(std::string n, double hp, double df, double ap, int nb, double exp);
     
     double getAtk_m() const { return getCurAP(); }
-    inline void showInfo_m(SHORT x = 50, SHORT y = 3);
-    inline void clearInfo_m(SHORT x = 50, SHORT y = 3);
+    inline void showInfo_m(SHORT x = 60, SHORT y = 4);
+    inline void clearInfo_m(SHORT x = 60, SHORT y = 4);
     std::string getMonstName() const { return name; }
     int getNumber_m() const { return number; }
     int getCurHP_m() const { return getCurHP(); }

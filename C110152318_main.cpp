@@ -37,13 +37,16 @@ int main() {
                     break;
                 case 47:
                     int ti = globalVar::Command->insertCommand();
-                    if (ti == -1) globalVar::gameState = -1;
+                    if (ti == -1) globalVar::gameState = false;
                     break;
             }
         }
-        genMonster();
 
+        globalVar::screen->setCursorVisible(false);
+        globalVar::screen->clearAllMap();
+        globalVar::screen->displayMap();
         globalVar::user->showInfo();
+        genMonster();
         setfps(60);
     }
 
@@ -69,17 +72,42 @@ void initializeGame() {
     globalVar::user->showInfo();
     // for (int i = 2; i <= 1000; ++i)
     //     globalVar::user->expUp(100);
-    // globalVar::user->setLevel(100);
+    if (globalVar::user->getCurId() == "10")
+        globalVar::user->setLevel(100);
 }
 
 void genMonster() {
-    if (globalVar::genMons) {
+    if (!globalVar::genMons) {
+        if (globalVar::killNum > 5 || globalVar::monsterList.size() == 0) {
+            globalVar::screen->printMapMes("生成怪物:");
+            genAnyNumMons(rand()%5+1);
+            globalVar::killNum = 0;
+        }
+        return;
+    }
+    // clear monsterList
+    for (auto m : globalVar::monsterList)
+        delete m;
+    globalVar::monsterList.clear();
+    if (globalVar::screen->getCurCity() == "market") return;
+    // todo
+    // gen monster
+    // if (globalVar::screen->getCurCity() == "DemonCity") {
+    //     globalVar::monsterList.emplace_back(new Monster(
+    //         ranInfo[pos].name, ranInfo[pos].HP, ranInfo[pos].DF, ranInfo[pos].AP,
+    //         MonstData::curMonsNum, ranInfo[pos].EXP));
+    // }
+    // if (globalVar::screen->getCurCity() == "desertTemple" && globalVar::genMons) {
+    // }
+    if (globalVar::genMons) {  // 刷新地圖時候
         globalVar::screen->printMapMes("怪物資訊:");
         MonstData::curMonsNum = 0;
         // globalVar::monsterList.resize(MONSIZE, nullptr);
-        genAnyNumMons(rand()%MONSIZE+3);
-        globalVar::genMons = false;
+        int n = rand()%MONSIZE+3;
+        globalVar::screen->printMapMes("數量: "+to_string(n));
+        genAnyNumMons(n);
     }
+    globalVar::genMons = false;
 }
 
 BOOL CtrlHandler(DWORD fdwCtrlType) {

@@ -16,6 +16,7 @@
 #define TANK "4"
 
 #define MAXLEVEL 100
+#define MAXSKLEVEL 6
 
 static std::mutex mut;
 
@@ -30,11 +31,14 @@ class User {
     double needEXP = 10;
     double coin;
     bool live = true;
+    int skLevel = 1;
 
    public:
     JobComb* jb = nullptr;
     bool ware = false;
     int wareNumber = -1;
+    int totleKill = 0;
+    int skillPoint = 0;
 
    public:
     User();
@@ -58,6 +62,9 @@ class User {
     std::string getCurJob() const { return number; }
     bool isLive() const { return live; }
     void setLive(bool s) { live = s; }
+    int useSkill();
+    void incSklv() { skLevel += skLevel+1>MAXSKLEVEL ? 0 : 1; }
+    int getSklevel() const { return skLevel; }
 };
 
 User::User() {
@@ -85,6 +92,8 @@ void User::login() {
     std::string tempCityName;
     if (globalVar::jin["account"].count(ID) > 0) {
         int t = 3;
+        totleKill = globalVar::jin["account"][ID]["totleKill"];
+        skillPoint = globalVar::jin["account"][ID]["skillPoint"];
         while (t) {
             globalVar::screen->setStdCursorPos(0, 1);
             std::cout << std::string(globalVar::screen->getConsoleWidth(), ' ');
@@ -116,8 +125,10 @@ void User::login() {
             if (passwd == prePasswd) {
                 // todo
                 // waitAni("已重設密碼，登入中");
-            } else
+            } else {
+                system("cls");
                 return login();
+            }
         }
         changeJob();
         coin = globalVar::jin["account"][ID]["money"];
@@ -179,7 +190,7 @@ void User::selectJob() {
     try {
         i = std::stoi(number);
         if (i <= 0 || i > 4)
-        selectJob();
+            selectJob();
     } catch (const std::invalid_argument& e) {
         selectJob();
     }
@@ -191,7 +202,8 @@ void User::saveData() {
     userID["curCity"] = globalVar::screen->getCurCity();
     userID["passwd"] = passwd;
     userID["money"] = coin;
-
+    userID["totleKill"] = totleKill;
+    userID["skillPoint"] = skillPoint;
     userID["job"][number] = nlohmann::json{
         {"live", live},
         {"EXP", EXP},
@@ -257,7 +269,7 @@ void User::showInfo(SHORT x, SHORT y) const {
     showEXP();
     showCoin();
 
-    jb->showAllInfo(x, y + 2);
+    jb->showAllInfo(x, y + 3);
 }
 
 double User::LevelNeedEXP(int l) const {
@@ -272,7 +284,7 @@ void User::setLevel(int l) {
 void User::showCoin(SHORT x, SHORT y) const {
     // globalVar::screen->clearMes(x, y-1, 10);
     globalVar::screen->setMes(
-        "金錢: " + std::to_string(int(coin)) + " $" + std::string(7, ' '), x, y - 1);
+        "金錢: $" + std::to_string(int(coin)) + std::string(7, ' '), x, y - 1);
 }
 
 void User::showEXP(SHORT x, SHORT y) const {
@@ -287,7 +299,7 @@ void User::showEXP(SHORT x, SHORT y) const {
         globalVar::screen->setMes("坦克 Lv" + std::to_string(level), x, y);
 
     globalVar::screen->setColor(14);
-    globalVar::screen->setMes("經驗: ", x, y + 2);
+    globalVar::screen->setMes("經驗: ", x, y + 3);
     globalVar::screen->setColor(224);
     std::string tempS = std::to_string(int(EXP)) + "/" + std::to_string(int(needEXP));
 
@@ -299,11 +311,42 @@ void User::showEXP(SHORT x, SHORT y) const {
         if (double(i + 1) / (size_) > n)
             globalVar::screen->setColor(128);
         if (i >= start && i - start < tempS.size())
-            globalVar::screen->setMes(std::string(1, tempS.at(i - start)), x + i + 6, y + 2);
+            globalVar::screen->setMes(std::string(1, tempS.at(i - start)), x + i + 6, y + 3);
         else
-            globalVar::screen->setMes(" ", x + i + 6, y + 2);
+            globalVar::screen->setMes(" ", x + i + 6, y + 3);
     }
     globalVar::screen->setColor();
+    globalVar::screen->setMes(
+        "擊殺: " + std::to_string(totleKill) + " 技能點: " + std::to_string(skillPoint), x, y+2);
+}
+
+int User::useSkill() {
+    if (skillPoint <= 0) return -1;
+    --skillPoint;
+    if (number == WARRIOR) {
+        globalVar::screen->printMapMes(
+            "【戰士】發動了技能【四連斬】,連續攻擊 "+ std::to_string(4*skLevel) + 
+            " 次, LV: "+std::to_string(skLevel));
+        return 0;
+    } else if (number == MAGIC) {
+        globalVar::screen->printMapMes(
+            "【法師】發動了技能【祝福】,恢復了 "+ std::to_string(10*skLevel) + 
+            "% 生命, LV: "+std::to_string(skLevel));
+        jb->healHP(jb->getHP()*(10.0*skLevel/100.0));
+        return 1;
+    } else if (number == ASSASSIN) {
+        globalVar::screen->printMapMes(
+            "【刺客】發動了技能【吸血】,吸收攻擊 "+ std::to_string(10*skLevel) +
+            "% 持續5回合, LV: "+std::to_string(skLevel));
+        return 2;
+    } else if (number == TANK) {
+        globalVar::screen->printMapMes(
+            "【坦克】發動了技能【榮譽護盾】,防禦增加 "+ std::to_string(10*skLevel) +
+            " 10秒, LV: "+std::to_string(skLevel));
+        jb->addDF(10, 10000);
+        return 3;
+    }
+    return -2;
 }
 
 #endif
