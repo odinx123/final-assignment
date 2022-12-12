@@ -72,8 +72,6 @@ void initializeGame() {
     globalVar::user->showInfo();
     // for (int i = 2; i <= 1000; ++i)
     //     globalVar::user->expUp(100);
-    if (globalVar::user->getCurId() == "10")
-        globalVar::user->setLevel(100);
 }
 
 void genMonster() {

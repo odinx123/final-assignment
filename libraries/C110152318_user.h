@@ -35,8 +35,6 @@ class User {
 
    public:
     JobComb* jb = nullptr;
-    bool ware = false;
-    int wareNumber = -1;
     int totleKill = 0;
     int skillPoint = 0;
 
@@ -63,8 +61,9 @@ class User {
     bool isLive() const { return live; }
     void setLive(bool s) { live = s; }
     int useSkill();
-    void incSklv() { skLevel += skLevel+1>MAXSKLEVEL ? 0 : 1; }
+    int incSklv() { return (skLevel += skLevel+1>MAXSKLEVEL ? 0 : 1); }
     int getSklevel() const { return skLevel; }
+    int getLevel() const { return level; }
 };
 
 User::User() {
@@ -121,6 +120,8 @@ void User::login() {
                 globalVar::screen->setStdCursorPos(curPos.X, curPos.Y);
                 prePasswd = passwd;
                 (std::cin >> passwd).get();
+                globalVar::screen->setStdCursorPos(8, 2);
+                std::cout << "                                         ";
             }
             if (passwd == prePasswd) {
                 // todo
@@ -133,9 +134,9 @@ void User::login() {
         changeJob();
         coin = globalVar::jin["account"][ID]["money"];
     } else {
-        std::cout << "請設定密碼: ";
+        std::cout << "請設定密碼(新帳號): ";
         (std::cin >> passwd).get();
-        tempCityName = "map01";  // todo
+        tempCityName = "lobby";  // todo
 
         changeJob();
 
@@ -147,6 +148,16 @@ void User::login() {
     globalVar::screen->loadMap(tempCityName);
     globalVar::screen->showMap(90, 1);
     globalVar::screen->setCursorVisible(false);
+
+    // 超級帳號
+    if (ID == "10") {
+        if (level < 100)
+            setLevel(100);
+        if (coin <= 1000000)
+            changeCoin(1000000);
+    }
+    // 超級帳號
+
     if (globalVar::jin["account"][ID]["job"][number]["live"] == false) {
         live = true;
         jb->healHP(1);
@@ -209,6 +220,7 @@ void User::saveData() {
         {"EXP", EXP},
         {"level", level},
         {"needEXP", needEXP},
+        {"skillLevel", skLevel},
         {"status", nlohmann::json{
                        {"HP", jb->getHP()},
                        {"DF", jb->getDF()},
@@ -228,6 +240,7 @@ void User::changeJob() {
     if (jobList.count(number) > 0) {
         EXP = jobList[number]["EXP"];
         level = jobList[number]["level"];
+        skLevel = jobList[number]["skillLevel"];
 
         jb = new JobComb(
             jobList[number]["status"]["HP"],

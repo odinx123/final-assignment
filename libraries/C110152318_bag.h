@@ -2,6 +2,7 @@
 #define BAG_H 1
 
 #include <nlohmann/json.hpp>
+#include <unordered_set>
 #include <vector>
 
 #include "C110152318_object.h"
@@ -16,12 +17,15 @@ class Bag {
     int objNum = 0;
     int bagNum = 0;
     std::vector<Object*> shopList;
-    // {編號, {數量, 物件}}
-    std::map<int, std::pair<int, Object*>> bagList;
+    // {編號, 數量}
+    std::map<int, int> bagList;
+    int weapon = -1;                      // 武器
+    int chestplate = -1;                  // 胸甲
+    int pants = -1;                       // 褲子
+    std::unordered_set<int> alreadyWare;  // save it id
 
    public:
     Bag();
-    ~Bag();
 
     inline void showShopList() const;
     inline void showBagList() const;
@@ -39,6 +43,12 @@ class Bag {
     // 0 for eat, 1 for use.
     int getTypeByIdx(int idx) { return shopList[idx]->getType(); }
     inline void throwOut(int idx);
+    inline void addBagItemByIdx(int idx);
+    // 成功穿上裝備回傳0，反之則為-1
+    int wareItem(int index);
+    // 成功脫下裝備回傳0，反之則為-1，-2則是裝備不對應
+    int deWareItem(int index);
+    inline void eatObj(int index);
 };
 
 Bag::Bag() {
@@ -64,18 +74,11 @@ Bag::Bag() {
     loadBagItem();
 }
 
-Bag::~Bag() {
-    for (auto& obj : shopList)
-        delete obj;
-    for (auto& obj : bagList)
-        delete obj.second.second;
-}
-
 void Bag::showShopList() const {
     int cnt = 0;
     for (const auto& s : shopList)
         globalVar::screen->printMapMes(
-            std::to_string(cnt++) + ": " + s->getName() + " " + std::to_string(s->getCoin()) + "$");
+            std::to_string(cnt++) + ": " + s->getName() + " $" + std::to_string(s->getCoin()));
 }
 
 void Bag::showBagList() const {
@@ -87,12 +90,12 @@ void Bag::showBagList() const {
     globalVar::screen->printMapMes("背包格子數量: " + std::to_string(bagNum) + "/" + std::to_string(MAXBAGNUM));
     std::string name, space;
     for (const auto& s : bagList) {
-        name = s.second.second->getName();
-        int n = 22-name.size()/3*2;
+        name = objList[s.first]->getName();
+        int n = 22 - name.size() / 3 * 2;
         globalVar::screen->printMapMes(
-            std::to_string(s.first) + ": " + name+ std::string(n, ' ')+
-            "數量: " + std::to_string(s.second.first) +
-            (s.second.second->getIdx() == globalVar::user->wareNumber ? " 已裝備" : ""));
+            std::to_string(s.first) + ": " + name + std::string(n, ' ') +
+            "數量: " + std::to_string(s.second) +
+            (alreadyWare.count(objList[s.first]->getIdx()) >= 1 ? " 已裝備" : ""));
     }
 }
 
@@ -105,64 +108,69 @@ int Bag::buy(int n) {
     globalVar::user->changeCoin(-shopList[n]->getCoin());
     globalVar::user->showCoin();
     if (bagList.count(shopList[n]->getIdx()) > 0)
-        ++bagList[shopList[n]->getIdx()].first;
+        ++bagList[shopList[n]->getIdx()];
     else {
-        bagList.insert({shopList[n]->getIdx(), {1, shopList[n]}});
+        bagList.insert({shopList[n]->getIdx(), 1});
         ++bagNum;
     }
     return 0;
 }
 
-int Bag::useBagItem(int idx, bool s) {
+int Bag::useBagItem(int idx, bool s) {  // todo
     if (bagList.count(idx) <= 0) {
         globalVar::screen->printMapMes("此裝備不存在!!!");
         globalVar::screen->printMapMes(" ");
         return -1;
     }
-    if (bagList[idx].second->getJobNumber() != globalVar::user->getCurJob() &&
-        bagList[idx].second->getJobNumber() != "0") {
+    if (objList[idx]->getJobNumber() != globalVar::user->getCurJob() &&
+        objList[idx]->getJobNumber() != "0") {
         globalVar::screen->printMapMes("你的職業無法使用此裝備!!!");
         globalVar::screen->printMapMes(" ");
         return -1;
     }
-    auto t = bagList[idx].second->useBagObj(s);
-    if (s) {
-        if (t && globalVar::user->ware) {
-            globalVar::screen->printMapMes("一次只能穿一件裝備!!!");
+
+    int state = 0;
+    if (objList[idx]->getType() == 0) {
+        if (!s) {
+            globalVar::screen->printMapMes("這個物品【不會】被穿在身上!!!");
             return -1;
         }
-        if (bagList[idx].first-- > 0 && t) {
-            globalVar::user->ware = true;
-            globalVar::user->wareNumber = idx;
-        } else if (!t && bagList[idx].first == 0) {
-            throwOut(idx);
-        }
+        eatObj(idx);
     } else {
-        if (t && globalVar::user->wareNumber == idx && globalVar::user->ware) {
-            globalVar::user->ware = false;
-            globalVar::user->wareNumber = -1;
-            ++bagList[idx].first;
+        if (s) {  // 傳進來true就是穿裝命令
+            state = wareItem(idx);
+            if (state == -1)
+                globalVar::screen->printMapMes("這位部位已經有裝備了!!!");
+            globalVar::screen->printMapMes(" ");
         } else {
-            globalVar::screen->printMapMes("你沒有穿上" + bagList[idx].second->getName());
+            state = deWareItem(idx);
+            if (state == -1)
+                globalVar::screen->printMapMes("這個部位沒有穿上裝備!!!");
+            else if (state == -2)
+                globalVar::screen->printMapMes("你沒有穿上【"+objList[idx]->getName()+"】!!!");
+            globalVar::screen->printMapMes(" ");
         }
     }
-    return t;
+
+    return state;
 }
 
-void Bag::saveBagItem() {
+void Bag::saveBagItem() {  // bug
     auto& userBag = globalVar::jin["account"][globalVar::user->getCurId()]["bag"];
     userBag = nlohmann::json{
         {"objNum", globalVar::bg->getObjNum()},
         {"bagNum", globalVar::bg->getBagNum()},
     };
 
-    if (globalVar::user->ware) {
-        bagList[globalVar::user->wareNumber].second->useBagObj(false);
-        ++bagList[globalVar::user->wareNumber].first;
-    }
+    if (weapon != -1)
+        deWareItem(weapon);
+    if (chestplate != -1)
+        deWareItem(chestplate);
+    if (pants != -1)
+        deWareItem(pants);
 
     for (const auto& o : bagList)
-        userBag[std::to_string(o.first)] = o.second.first;
+        userBag[std::to_string(o.first)] = o.second;
 
     globalVar::file_out.open(path);
     globalVar::file_out << globalVar::jin.dump(4) << std::endl;
@@ -182,22 +190,83 @@ void Bag::loadBagItem() {
             bagNum = o.value();
         else if (o.key() == "objNum")
             objNum = o.value();
-        else if (o.key() == "wareNumber") {
-            globalVar::user->ware =  o.value() != -1;
-            globalVar::user->wareNumber = o.value();
-        } else
-            bagList.insert({std::stoi(o.key()), {o.value(), shopList[std::stoi(o.key())]}});
+        else
+            bagList.insert({std::stoi(o.key()), o.value()});
     }
 }
 
 void Bag::throwOut(int idx) {
-    if (globalVar::user->wareNumber == idx) {
+    if (weapon == idx || pants == idx || chestplate == idx) {
         globalVar::screen->printMapMes("你還穿著這件裝備");
+        globalVar::screen->printMapMes(" ");
         return;
     }
+    globalVar::screen->printMapMes("已丟棄【" + objList[idx]->getName() + "】!!!");
     bagList.erase(idx);
     eraseBagItemFromData(idx);
     --bagNum;
+}
+
+void Bag::addBagItemByIdx(int idx) {
+    ++bagList[idx];
+}
+
+int Bag::wareItem(int index) {
+    switch (objList[index]->getType()) {
+        case ARMS:
+            if (weapon != -1)
+                return -1;
+            weapon = index;
+            break;
+        case BODY:
+            if (chestplate != -1)
+                return -1;
+            chestplate = index;
+            break;
+        case LEG:
+            if (pants != -1)
+                return -1;
+            pants = index;
+            break;
+    }
+    --bagList[index];
+    objList[index]->use();
+    alreadyWare.insert(index);
+    return 0;
+}
+
+int Bag::deWareItem(int index) {
+    switch (objList[index]->getType()) {
+        case ARMS:
+            if (weapon == -1)  // todo
+                return -1;
+            else if (objList[index]->getIdx() != weapon)
+                return -2;
+            weapon = -1;
+            break;
+        case BODY:
+            if (chestplate == -1)
+                return -1;
+            else if (objList[index]->getIdx() != chestplate)
+                return -2;
+            chestplate = -1;
+            break;
+        case LEG:
+            if (pants == -1)
+                return -1;
+            else if (objList[index]->getIdx() != pants)
+                return -2;
+            pants = -1;
+            break;
+    }
+    ++bagList[index];
+    objList[index]->deuse();
+    alreadyWare.erase(index);
+    return 0;
+}
+
+void Bag::eatObj(int index) {
+    objList[index]->eat();
 }
 
 #endif

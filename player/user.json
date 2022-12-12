@@ -2,43 +2,43 @@
     "account": {
         "10": {
             "bag": {
-                "2": 2,
-                "6": 1,
-                "8": 2,
-                "bagNum": 3,
+                "11": 1,
+                "bagNum": 1,
                 "objNum": 0
             },
             "curCity": "market",
             "job": {
-                "2": {
-                    "EXP": 181951.1275162234,
-                    "level": 100,
-                    "live": true,
-                    "needEXP": 181951.1275162234,
-                    "status": {
-                        "AP": 2042.2971333416135,
-                        "DF": 39.0798122936259,
-                        "HP": 14572.360000000002,
-                        "curHP": 14572.360000000002
-                    }
-                },
                 "3": {
                     "EXP": 181951.1275162234,
                     "level": 100,
                     "live": true,
                     "needEXP": 181951.1275162234,
+                    "skillLevel": 1,
                     "status": {
                         "AP": 2681.7895103757805,
                         "DF": 37.97508794942643,
                         "HP": 11764.86,
                         "curHP": 11764.86
                     }
+                },
+                "4": {
+                    "EXP": 0.0,
+                    "level": 1,
+                    "live": true,
+                    "needEXP": 10.0,
+                    "skillLevel": 1,
+                    "status": {
+                        "AP": 10.0,
+                        "DF": 23.0,
+                        "HP": 32.0,
+                        "curHP": 32.0
+                    }
                 }
             },
-            "money": 40110.0,
+            "money": 998840.0,
             "passwd": "10",
-            "skillPoint": 2,
-            "totleKill": 68
+            "skillPoint": 0,
+            "totleKill": 0
         }
     }
 }
