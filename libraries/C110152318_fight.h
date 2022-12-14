@@ -49,10 +49,14 @@ void Fight::getFightWithMonsId(int id) {
                     Sleep(1000);
                     continue;
                 }
-                if (sk == 0) atkNum += 4*globalVar::user->getSklevel();
-                else if (sk == 1);
-                else if (sk == 2) suckBlood += 5;
-                else if (sk == 3);
+                if (sk == 0)
+                    atkNum += 4 * globalVar::user->getSklevel();
+                else if (sk == 1)
+                    ;
+                else if (sk == 2)
+                    suckBlood += 5;
+                else if (sk == 3)
+                    ;
             }
         }
         if (atkNum) {
@@ -61,41 +65,49 @@ void Fight::getFightWithMonsId(int id) {
         }
         if (atkPri) {
             double dmg = 0;
-            if (rand() % 4) {  // 普攻
+            double rate = rand() / (RAND_MAX + 1.0);
+            if (rate <= globalVar::user->getCritiCalRate()) {  // 爆擊
+                dmg = curMonster->deHP_m(playerAtk + playerAtk * globalVar::user->getCritiCalDmg());
+                globalVar::screen->printMapMes(
+                    "你憤力一擊對【 " + curMonster->getMonstName() +
+                    " 】造成< " + std::to_string(dmg) + " >點爆擊傷害!!! 【爆擊】");
+            } else if (rate < 1 - globalVar::user->getCritiCalRate()) {  // 普攻
                 dmg = curMonster->deHP_m(playerAtk);
                 globalVar::screen->printMapMes(
                     "你出手攻擊對【 " + curMonster->getMonstName() +
                     " 】造成< " + std::to_string(dmg) + " >點傷害!!! 【普攻】");
-            } else if (!(rand() % 5)) {  // 閃避
+            } else {  // 閃避
                 globalVar::screen->printMapMes(
                     "你發動攻擊但【" + curMonster->getMonstName() + "】身手敏捷躲避了攻擊!!! 【閃躲】");
-            } else {  // 爆擊
-                dmg = curMonster->deHP_m(playerAtk + playerAtk * 0.5);
-                globalVar::screen->printMapMes(
-                    "你憤力一擊對【 " + curMonster->getMonstName() +
-                    " 】造成< " + std::to_string(dmg) + " >點爆擊傷害!!! 【爆擊】");
             }
+
             if (suckBlood) {
                 --suckBlood;
-                double heblood = dmg*(10*globalVar::user->getSklevel()/100.0);
+                double heblood = dmg * (10 * globalVar::user->getSklevel() / 100.0);
                 globalVar::user->jb->healHP(heblood);
                 if (dmg == 0) {
-                    globalVar::screen->printMapMes("你的攻擊揮空,寫量沒有恢復!!!");
+                    globalVar::screen->printMapMes("你的攻擊揮空,血量沒有恢復!!!");
                 } else {
                     globalVar::screen->printMapMes(
-                    "你擁有【吸血】效果,寫量恢復"+
-                    std::to_string(int(heblood)));
+                        "你擁有【吸血】效果,血量恢復" +
+                        std::to_string(int(heblood)));
                 }
             }
 
             curMonster->showInfo_m();
             if (curMonster->getCurHP_m() <= 0.5) {  // 殺掉
-                ++globalVar::killNum;
-                ++globalVar::user->totleKill;
-                ++globalVar::user->skillPoint;
+                if (rand()/(RAND_MAX+1.0) <= curMonster->getFallRate()) {  // 50%掉裝
+                    globalVar::screen->printMapMes(
+                        "成功掉落【"+
+                        objList[curMonster->getFallItemNum()]->getName()+"】");
+                    globalVar::bg->addBagItemByIdx(curMonster->getFallItemNum());
+                }
+                globalVar::user->changeCoin(curMonster->getFallCoin());  // 獲得錢
+                ++globalVar::killNum;  // 用來判斷是否生怪用的
+                ++globalVar::user->totleKill;  // 增加總擊殺數
+                globalVar::user->expUp(curMonster->getEXP());  // 獲得經驗
                 globalVar::screen->printMapMes(curMonster->getMonstName() + "死亡!");
-                globalVar::user->expUp(curMonster->getEXP());
-                deleteMonsterByID(id);
+                deleteMonsterByID(id);  // 刪除怪物
                 break;
             }
         } else {
@@ -106,7 +118,7 @@ void Fight::getFightWithMonsId(int id) {
                     std::to_string(dmg) + " >點傷害!!! 【普攻】");
             } else if (!(rand() % 5)) {  // 閃避
                 globalVar::screen->printMapMes(
-                    "【"+curMonster->getMonstName()+"】發動攻擊,但你身手敏捷躲避了攻擊!!! 【閃躲】");
+                    "【" + curMonster->getMonstName() + "】發動攻擊,但你身手敏捷躲避了攻擊!!! 【閃躲】");
             } else {  // 爆擊
                 double dmg = globalVar::user->jb->deHP(monsterAtk + monsterAtk * 0.5);
                 globalVar::screen->printMapMes(

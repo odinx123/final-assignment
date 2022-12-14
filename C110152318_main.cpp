@@ -45,13 +45,12 @@ int main() {
         globalVar::screen->setCursorVisible(false);
         globalVar::screen->clearAllMap();
         globalVar::screen->displayMap();
-        globalVar::user->showInfo();
+        // globalVar::user->showInfo();
         genMonster();
         setfps(60);
     }
 
     globalVar::bg->saveBagItem();
-    globalVar::user->saveData();
     system("cls");
     system("pause");
     return 0;
@@ -114,10 +113,10 @@ BOOL CtrlHandler(DWORD fdwCtrlType) {
         case CTRL_CLOSE_EVENT:
             Beep(750, 100);
             globalVar::bg->saveBagItem();
-            globalVar::user->saveData();  // bug
             globalVar::gameState = false;
             return false;
         default:
             return true;
     }
+    return true;
 }

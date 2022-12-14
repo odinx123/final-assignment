@@ -5,10 +5,10 @@
 #include <unordered_map>
 
 #include "C110152318_bag.h"
-#include "C110152318_map.h"
-#include "C110152318_monster.h"
-#include "C110152318_monstData.h"
 #include "C110152318_fight.h"
+#include "C110152318_map.h"
+#include "C110152318_monstData.h"
+#include "C110152318_monster.h"
 
 typedef int (*insFun)(const std::vector<std::string>&);
 
@@ -33,7 +33,6 @@ int funcExit(const std::vector<std::string>& tokens) {
 
 int funcSave(const std::vector<std::string>& tokens) {
     globalVar::bg->saveBagItem();
-    globalVar::user->saveData();
     globalVar::screen->clearMes(0, 0, 30);
     printMes("Already save data.", 0, 0, 10);
     return 0;
@@ -202,18 +201,15 @@ int funcMonsList(const std::vector<std::string>& tokens) {
     globalVar::screen->printMapMes("怪物資訊:");
     globalVar::screen->printMapMes("數量: " + std::to_string(globalVar::monsterList.size()));
     for (const auto& m : globalVar::monsterList) {
-        int size_ = gapSize_/3*2 - m->getMonstName().size()/3*2;
-        int sizeHP = gapHP - getNumberSize(m->getCurHP_m())+2;
-        int sizeAP = gapAP - getNumberSize(m->getCurAP_m())+2;
-        int sizeDF = gapDF - getNumberSize(m->getCurDF_m())+2;
+        int size_ = gapSize_ / 3 * 2 - m->getMonstName().size() / 3 * 2;
+        int sizeHP = gapHP - getNumberSize(m->getCurHP_m()) + 2;
+        int sizeAP = gapAP - getNumberSize(m->getCurAP_m()) + 2;
+        int sizeDF = gapDF - getNumberSize(m->getCurDF_m()) + 2;
         globalVar::screen->printMapMes(
-            m->getMonstName() + "(" + std::to_string(m->getNumber_m()) +")"+
-            std::string(size_, ' ') +"【 HP:" + std::to_string(int(m->getCurHP_m()))+
-            std::string(sizeHP, ' ') +"DF:" + std::to_string(int(m->getCurDF_m())) +
-            std::string(sizeDF, ' ') + "AP:" + std::to_string(int(m->getCurAP_m())) + std::string(sizeAP, ' ') +"】");
-    //     globalVar::screen->printMapMes(
-    //         m->getMonstName() + "(" + std::to_string(m->getNumber_m()) + ")"+ std::string(size_, ' ') + "【 HP:" + std::to_string(m->getCurHP_m()) + "\t" +
-    //         "DF:" + std::to_string(m->getCurDF_m()) + "\tAP:" + std::to_string(m->getCurAP_m()) + "\t】");
+            m->getMonstName() + "(" + std::to_string(m->getNumber_m()) + ")" +
+            std::string(size_, ' ') + "【 HP:" + std::to_string(int(m->getCurHP_m())) +
+            std::string(sizeHP, ' ') + "DF:" + std::to_string(int(m->getCurDF_m())) +
+            std::string(sizeDF, ' ') + "AP:" + std::to_string(int(m->getCurAP_m())) + std::string(sizeAP, ' ') + "】");
     }
 
     globalVar::screen->printMapMes(" ");
@@ -252,7 +248,7 @@ int funcThrow(const std::vector<std::string>& tokens) {
     globalVar::screen->printMapMes(" ");
     if (!globalVar::bg->isBagCanUse())
         return 1;
-    
+
     std::string ins;
     globalVar::screen->setCursorVisible(true);
 
@@ -314,7 +310,7 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
         return 0;
     }
 
-    int sklv = globalVar::user->getSklevel(), needCoin = std::pow(3, sklv)*100;
+    int sklv = globalVar::user->getSklevel(), needCoin = std::pow(3, sklv) * 100;
 
     if (sklv >= MAXSKLEVEL) {
         globalVar::screen->printMapMes("你當前職業技能已經滿級");
@@ -323,10 +319,10 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
     }
 
     globalVar::screen->printMapMes(
-        "你需要 $"+std::to_string(needCoin) + " 個金幣來升級技能!!!");
+        "你需要 $" + std::to_string(needCoin) + " 個金幣來升級技能!!!");
     globalVar::screen->printMapMes("是否繼續(按下Enter繼續/Esc取消)");
     char c;
-    while(c = _getch()) {
+    while (c = _getch()) {
         if (c == 27) {
             globalVar::screen->printMapMes("取消升級!!!");
             break;
@@ -336,10 +332,10 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
                 globalVar::screen->printMapMes("你的錢不夠進行技能升級!!!");
                 break;
             }
-            
+
             globalVar::screen->printMapMes(
-                "技能從 Lv"+std::to_string(sklv)+
-                " 升級到 Lv"+std::to_string(globalVar::user->incSklv()));
+                "技能從 Lv" + std::to_string(sklv) +
+                " 升級到 Lv" + std::to_string(globalVar::user->incSklv()));
             globalVar::user->changeCoin(needCoin);
             break;
         }
@@ -357,19 +353,19 @@ int funcShowLevel(const std::vector<std::string>& tokens) {
         return 1;
     }
     globalVar::screen->printMapMes(
-        "你的技能等級 Lv: "+std::to_string(globalVar::user->getSklevel()));
+        "你的技能等級 Lv: " + std::to_string(globalVar::user->getSklevel()));
     globalVar::screen->printMapMes(" ");
-    
+
     return 0;
 }
 
-int funcLobOut(const std::vector<std::string>& tokens) {
+int funcLogOut(const std::vector<std::string>& tokens) {
     if (tokens.size() != 1) {
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
-    
+
     system("cls");
     globalVar::screen->setStdCursorPos(0, 0);
     std::cout << "從新登入(0)/離開遊戲(1): ";
@@ -401,11 +397,88 @@ int funcLobOut(const std::vector<std::string>& tokens) {
         return -1;
     } else if (index == 0) {
         funcSave(tokens);
-        system("cls");
+        delete globalVar::bg;
         delete globalVar::user;
+        system("cls");
         globalVar::user = new User();
+        globalVar::bg = new Bag;
     } else {
         globalVar::screen->printMapMes("輸入錯誤!!!");
+    }
+    globalVar::screen->printMapMes(" ");
+    return 0;
+}
+
+int funcStoreHouse(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 2 || (tokens[1] != "put" && tokens[1] != "get" 
+                            && tokens[1] != "remove" && tokens[1] != "show")) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    int s = 0;
+    if (tokens[1] == "put") {
+        globalVar::screen->printMapMes("請選擇要放入【倉庫】的物品!!!");
+        globalVar::bg->showBagList();
+    } else if (tokens[1] == "get") {
+        s = 1;
+        if (globalVar::bg->getStoreNum() <= 0) {
+            globalVar::screen->printMapMes("你的【倉庫】沒有東西");
+            globalVar::screen->printMapMes(" ");
+            return 1;
+        }
+        globalVar::screen->printMapMes("請選擇要放入【背包】的物品!!!");
+        globalVar::bg->showStoreHouse();
+    } else if (tokens[1] == "remove") {
+        s = 2;
+        globalVar::screen->printMapMes("請選擇要【丟棄】的物品!!!");
+        if (globalVar::bg->getStoreNum() <= 0) {
+            globalVar::screen->printMapMes("你的【倉庫】沒有東西");
+            globalVar::screen->printMapMes(" ");
+            return 1;
+        }
+        globalVar::bg->showStoreHouse();
+    } else if (tokens[1] == "show") {
+        globalVar::bg->showStoreHouse();
+        if (globalVar::bg->getStoreNum() <= 0)
+            globalVar::screen->printMapMes("你的【倉庫】沒有東西");
+        globalVar::screen->printMapMes(" ");
+        return 0;
+    }
+
+    std::string ins;
+    globalVar::screen->setCursorVisible(true);
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    globalVar::screen->clearMes(0, 5, 10);
+    globalVar::screen->setCursorVisible(false);
+    if (ins.size() == 0) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+
+    int index;
+    try {
+        index = stoi(ins);
+    } catch (const std::invalid_argument& e) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+    switch (s) {
+        case 0:
+            globalVar::bg->putItemToStoreHouse(index);
+            break;
+        case 1:
+            globalVar::bg->getObjFromStoreHouse(index);
+            break;
+        case 2:
+            globalVar::bg->remItemFromStoreHouse(index);
+            break;
     }
     globalVar::screen->printMapMes(" ");
     return 0;
@@ -423,7 +496,8 @@ Instruction::Instruction() {
     funcMap["skill"] = reinterpret_cast<void*>(funcSkillUp);
     funcMap["throw"] = reinterpret_cast<void*>(funcThrow);
     funcMap["showSkill"] = reinterpret_cast<void*>(funcShowLevel);
-    funcMap["logout"] = reinterpret_cast<void*>(funcLobOut);
+    funcMap["logout"] = reinterpret_cast<void*>(funcLogOut);
+    funcMap["store"] = reinterpret_cast<void*>(funcStoreHouse);
 }
 
 int Instruction::insertCommand() {

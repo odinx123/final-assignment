@@ -32,6 +32,8 @@ class User {
     double coin;
     bool live = true;
     int skLevel = 1;
+    double CRT_Rate = 0.1;
+    double CRT_dmg = 0.5;
 
    public:
     JobComb* jb = nullptr;
@@ -64,6 +66,10 @@ class User {
     int incSklv() { return (skLevel += skLevel+1>MAXSKLEVEL ? 0 : 1); }
     int getSklevel() const { return skLevel; }
     int getLevel() const { return level; }
+    double getCritiCalRate() const { return CRT_Rate; }
+    void incCritiCalRate(int rate) { CRT_Rate += rate; }
+    void decCritiCalRate(int rate) { CRT_Rate -= rate; }
+    double getCritiCalDmg() { return CRT_dmg; }
 };
 
 User::User() {
@@ -78,6 +84,20 @@ User::User() {
     globalVar::file_in.close();
 
     login();
+
+    if (number == WARRIOR) {
+        CRT_Rate = 0.2;
+        CRT_dmg = 0.75*(level/5.0);
+    } else if (number == MAGIC) {
+        CRT_Rate = 0.15;
+        CRT_dmg = 833*(level/5.0);
+    } else if (number == ASSASSIN) {
+        CRT_Rate = 0.3;
+        CRT_dmg = 1.45*(level/5.0);
+    } else if (number == TANK) {
+        CRT_Rate = 0.1;
+        CRT_dmg = 0.54*(level/5.0);
+    }
     saveData();
 }
 
@@ -216,6 +236,7 @@ void User::saveData() {
     userID["totleKill"] = totleKill;
     userID["skillPoint"] = skillPoint;
     userID["job"][number] = nlohmann::json{
+        {"skillPoint", skillPoint},
         {"live", live},
         {"EXP", EXP},
         {"level", level},
@@ -227,9 +248,9 @@ void User::saveData() {
                        {"AP", jb->getAP()},
                        {"curHP", jb->getCurHP()}}}};
 
-    globalVar::file_out.open(path);
-    globalVar::file_out << globalVar::jin.dump(4) << std::endl;
-    globalVar::file_out.close();
+    // globalVar::file_out.open(path);
+    // globalVar::file_out << globalVar::jin.dump(4) << std::endl;
+    // globalVar::file_out.close();
 }
 
 void User::changeJob() {
@@ -249,6 +270,7 @@ void User::changeJob() {
             std::stoi(number) - 1);
         needEXP = jobList[number]["needEXP"];
         jb->setCurHP(jobList[number]["status"]["curHP"]);
+        skillPoint = jobList[number]["skillPoint"];
     } else {
         EXP = 0;
         level = 1;
@@ -269,6 +291,7 @@ void User::expUp(double l) {
     while (level < MAXLEVEL && (fabs(needEXP - EXP) <= 0.0001 || EXP >= needEXP)) {
         ++level;
         EXP -= needEXP;
+        ++skillPoint;  // 技能點數
         jb->setLevelStatus();
         if (level < MAXLEVEL)
             needEXP += (needEXP * 0.1 + 3000) * 0.2 + 10;
@@ -291,7 +314,7 @@ double User::LevelNeedEXP(int l) const {
 
 void User::setLevel(int l) {
     for (int i = level + 1; i <= l; ++i)
-        globalVar::user->expUp(globalVar::user->LevelNeedEXP(i) - EXP);
+        expUp(LevelNeedEXP(i) - EXP);
 }
 
 void User::showCoin(SHORT x, SHORT y) const {
