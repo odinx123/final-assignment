@@ -392,9 +392,8 @@ void Job::chCurAP(double ap) {
 
 void Job::chCurHP(double hp) {
     HP += hp;
-    curHP += hp;
-    if (curHP <= 0)
-        curHP = 1;
+    if (curHP > HP)
+        curHP = HP;
 }
 
 #endif

@@ -100,7 +100,7 @@ void Fight::getFightWithMonsId(int id) {
                     globalVar::screen->printMapMes(
                         "成功掉落【"+
                         objList[curMonster->getFallItemNum()]->getName()+"】");
-                    globalVar::bg->addBagItemByIdx(curMonster->getFallItemNum());
+                    globalVar::bg->addBagItemByIdx(curMonster->getFallItemNum(), 1);
                 }
                 globalVar::user->changeCoin(curMonster->getFallCoin());  // 獲得錢
                 ++globalVar::killNum;  // 用來判斷是否生怪用的

@@ -20,11 +20,11 @@ class Instruction {
     Instruction();
 
     int insertCommand();
-    void splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c);
     void printConmand() const;
 };
 
 inline void printMes(const std::string& mes, SHORT x, SHORT y, int color);
+void splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c);
 
 int funcExit(const std::vector<std::string>& tokens) {
     Beep(750, 100);
@@ -97,7 +97,9 @@ int funcShop(const std::vector<std::string>& tokens) {
     std::string ins;
     globalVar::screen->setCursorVisible(true);
     globalVar::screen->setInfoCursorPos(0, 5);
+
     std::getline(std::cin, ins);
+
     if (ins.size() == 0) {
         globalVar::screen->clearMes(0, 5, 10);
         globalVar::screen->clearMes(0, 0, 30);
@@ -119,7 +121,7 @@ int funcShop(const std::vector<std::string>& tokens) {
     }
 
     // todo
-    auto state = globalVar::bg->buy(index);
+    auto state = globalVar::bg->buy(index, 1);
     if (state == 1) {
         globalVar::screen->printMapMes("錢不夠購買" + globalVar::bg->getShopNameByIndex(index));
     } else if (state == 2) {
@@ -128,6 +130,8 @@ int funcShop(const std::vector<std::string>& tokens) {
         globalVar::screen->printMapMes("背包大小不足!!!");
     } else if (state == 4) {
         globalVar::screen->printMapMes("職業不合，無法購買!!!");
+    } else {
+        globalVar::screen->printMapMes("購買成功!!!");
     }
     globalVar::screen->printMapMes(" ");
 
@@ -148,21 +152,25 @@ int funcShowBag(const std::vector<std::string>& tokens) {
 
     if (tokens.size() == 2 && (tokens[1] == "use" || tokens[1] == "deuse")) {
         std::string ins;
-        int index;
+        int index, lv = 1;
 
         globalVar::screen->setInfoCursorPos(0, 5);
         globalVar::screen->setCursorVisible(true);
         std::getline(std::cin, ins);
+        std::vector<std::string> list;
+        splitstring(ins, list, " ");
         globalVar::screen->setCursorVisible(false);
         globalVar::screen->clearMes(0, 5, 10);
-        if (ins.size() == 0) {
+        if (ins.size() == 0 || list.size() > 2) {
             globalVar::screen->clearMes(0, 5, 10);
             globalVar::screen->clearMes(0, 0, 30);
             printMes("Command error!!!", 0, 0, 4);
             return 1;
         }
         try {
-            index = stoi(ins);
+            index = stoi(list[0]);
+            if (list.size() == 2)
+                lv = stoi(list[1]);
         } catch (const std::invalid_argument& e) {
             globalVar::screen->clearMes(0, 0, 30);
             printMes("Command error!!!", 0, 0, 4);
@@ -170,9 +178,9 @@ int funcShowBag(const std::vector<std::string>& tokens) {
         }
 
         if (tokens[1] == "use") {
-            globalVar::bg->useBagItem(index, true);
+            globalVar::bg->useBagItem(index, lv, true);
         } else if (tokens[1] == "deuse") {
-            globalVar::bg->useBagItem(index, false);
+            globalVar::bg->useBagItem(index, lv, false);
         }
     }
 
@@ -254,15 +262,19 @@ int funcThrow(const std::vector<std::string>& tokens) {
 
     globalVar::screen->setInfoCursorPos(0, 5);
     std::getline(std::cin, ins);
-    if (ins.size() == 0) {
+    std::vector<std::string> list;
+    splitstring(ins, list, " ");
+    if (ins.size() == 0 || list.size() > 2) {
         globalVar::screen->clearMes(0, 5, 10);
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
-    int index;
+    int index, lv = 1;
     try {
-        index = stoi(ins);
+        index = stoi(list[0]);
+        if (list.size() == 2)
+            lv = stoi(list[1]);
     } catch (const std::invalid_argument& e) {
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
@@ -292,7 +304,7 @@ int funcThrow(const std::vector<std::string>& tokens) {
         return 1;
     }
 
-    globalVar::bg->throwOut(index);
+    globalVar::bg->throwOut(index, lv);
     globalVar::screen->printMapMes(" ");
 
     return 0;
@@ -440,9 +452,9 @@ int funcStoreHouse(const std::vector<std::string>& tokens) {
         }
         globalVar::bg->showStoreHouse();
     } else if (tokens[1] == "show") {
-        globalVar::bg->showStoreHouse();
         if (globalVar::bg->getStoreNum() <= 0)
             globalVar::screen->printMapMes("你的【倉庫】沒有東西");
+        globalVar::bg->showStoreHouse();
         globalVar::screen->printMapMes(" ");
         return 0;
     }
@@ -451,18 +463,22 @@ int funcStoreHouse(const std::vector<std::string>& tokens) {
     globalVar::screen->setCursorVisible(true);
     globalVar::screen->setInfoCursorPos(0, 5);
     std::getline(std::cin, ins);
+    std::vector<std::string> list;
+    splitstring(ins, list, " ");
     globalVar::screen->clearMes(0, 5, 10);
     globalVar::screen->setCursorVisible(false);
-    if (ins.size() == 0) {
+    if (ins.size() == 0 || list.size() > 2) {
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
         globalVar::screen->printMapMes(" ");
         return 1;
     }
 
-    int index;
+    int index, lv = 1;
     try {
-        index = stoi(ins);
+        index = stoi(list[0]);
+        if (list.size() == 2)
+            lv = stoi(list[1]);
     } catch (const std::invalid_argument& e) {
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
@@ -471,13 +487,13 @@ int funcStoreHouse(const std::vector<std::string>& tokens) {
     }
     switch (s) {
         case 0:
-            globalVar::bg->putItemToStoreHouse(index);
+            globalVar::bg->putItemToStoreHouse(index, lv);
             break;
         case 1:
-            globalVar::bg->getObjFromStoreHouse(index);
+            globalVar::bg->getObjFromStoreHouse(index, lv);
             break;
         case 2:
-            globalVar::bg->remItemFromStoreHouse(index);
+            globalVar::bg->remItemFromStoreHouse(index, lv);
             break;
     }
     globalVar::screen->printMapMes(" ");
@@ -534,7 +550,7 @@ int Instruction::insertCommand() {
     return (reinterpret_cast<insFun>(it->second)(tokens));
 }
 
-void Instruction::splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c) {
+void splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c) {
     std::string::size_type pos1, pos2;
     pos2 = s.find_first_of(c);
     pos1 = 0;

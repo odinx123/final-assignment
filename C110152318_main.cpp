@@ -45,7 +45,7 @@ int main() {
         globalVar::screen->setCursorVisible(false);
         globalVar::screen->clearAllMap();
         globalVar::screen->displayMap();
-        // globalVar::user->showInfo();
+        globalVar::user->showInfo();
         genMonster();
         setfps(60);
     }

@@ -164,6 +164,7 @@ void User::login() {
         // waitAni("創建帳號中");
         coin = 100;
     }
+    system("cls");
     globalVar::screen->setAllCity();
     globalVar::screen->loadMap(tempCityName);
     globalVar::screen->showMap(90, 1);
@@ -208,7 +209,8 @@ void User::waitAni(const std::string& mes) const {
 
 void User::selectJob() {
     // todo
-    globalVar::screen->clearMap();
+    // globalVar::screen->clearMap();
+    system("cls");
     std::cout << "請選擇職業" << std::endl;
     std::cout << "戰士: 01" << std::endl;
     std::cout << "法師: 02" << std::endl;

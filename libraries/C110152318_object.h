@@ -29,7 +29,6 @@ class Object {
            int c = 100, int ty = 0, int id = 0, std::string jbn = 0);
     ~Object();
 
-    void wareObj(bool s);
     inline void printName(SHORT x, SHORT y) const;
     std::string getName() const { return name; }
     int getCoin() const { return coin; }
@@ -37,8 +36,8 @@ class Object {
     // 0 for eat, 1 for use.
     int getType() const { return type; }
     std::string getJobNumber() const { return jobNumber; }
-    void use();
-    void deuse();
+    void use(int lv);
+    void deuse(int lv);
     int eat();
 };
 
@@ -101,26 +100,26 @@ int Object::eat() {
     return type;
 }
 
-void Object::use() {  // just for use item not eat.
-    globalVar::user->jb->chCurAP(addAP);
-    globalVar::user->jb->chCurHP(addHP);
-    globalVar::user->jb->chCurDF(addDF);
+void Object::use(int lv) {  // just for use item not eat.
+    globalVar::user->jb->chCurAP(addAP*lv);
+    globalVar::user->jb->chCurHP(addHP*lv);
+    globalVar::user->jb->chCurDF(addDF*lv);
     globalVar::screen->printMapMes("你裝備了<" + name + ">");
     globalVar::screen->printMapMes(
-        "HP:" + std::to_string(addHP) + " " +
-        "AP:" + std::to_string(addAP) + " " +
-        "DF:" + std::to_string(addDF));
+        "HP:" + std::to_string(addHP*lv) + " " +
+        "AP:" + std::to_string(addAP*lv) + " " +
+        "DF:" + std::to_string(addDF*lv));
 }
 
-void Object::deuse() {  // just for use item not eat.
-    globalVar::user->jb->chCurAP(-addAP);
-    globalVar::user->jb->chCurHP(-addHP);
-    globalVar::user->jb->chCurDF(-addDF);
+void Object::deuse(int lv) {  // just for use item not eat.
+    globalVar::user->jb->chCurAP(-addAP*lv);
+    globalVar::user->jb->chCurHP(-addHP*lv);
+    globalVar::user->jb->chCurDF(-addDF*lv);
     globalVar::screen->printMapMes("你脫下了<" + name + ">");
     globalVar::screen->printMapMes(
-        "HP:" + std::to_string(-addHP) + " " +
-        "AP:" + std::to_string(-addAP) + " " +
-        "DF:" + std::to_string(-addDF));
+        "HP:" + std::to_string(-addHP*lv) + " " +
+        "AP:" + std::to_string(-addAP*lv) + " " +
+        "DF:" + std::to_string(-addDF*lv));
 }
 
 #endif
