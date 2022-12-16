@@ -47,25 +47,25 @@ Object::Object(const std::string& s, int hp, int df, int ap, int t,
                int c, int ty, int id, std::string jbn)
     : addAP(ap), addDF(df), addHP(hp), name(s), ms(t), coin(c), type(ty), idx(id), jobNumber(jbn) {}
 
-// 物品名、加血量、加防禦、加攻擊、效果時間(裝備無ms)、價錢、類型(0是吃的，1是穿的)、編號、適用職業(通用0)
+// 物品名、加血量、加防禦、加攻擊、效果時間(裝備無ms)、價錢、類型、編號、適用職業(通用0)
 std::vector<Object*> objList = {
-    new Object("金蘋果", 10, 10, 10, 10000, 50, EAT, Object::objNum++, "0"),
-    new Object("木劍", 0, 0, 10, 0, 100, ARMS, Object::objNum++, "0"),
-    new Object("鐵劍", 0, 0, 60, 0, 1000, ARMS, Object::objNum++, "0"),
-    new Object("火腿", 10, 10, 10, 20000, 10, EAT, Object::objNum++, "0"),
-    new Object("治療藥水【小】", 100, 0, 0, 0, 500, EAT, Object::objNum++, "0"),
-    new Object("治療藥水【中】", 2000, 0, 0, 0, 5000, EAT, Object::objNum++, "0"),
-    new Object("治療藥水【大】", 5000, 0, 0, 0, 10000, EAT, Object::objNum++, "0"),
-    new Object("鐵裝", 500, 15, 0, 0, 2000, BODY, Object::objNum++, "0"),
-    new Object("皮革裝", 100, 4, 0, 0, 500, BODY, Object::objNum++, "0"),
-    new Object("大砍刀【戰士限定】", 100, 10, 100, 0, 1260, ARMS, Object::objNum++, "1"),
-    new Object("瑪娜魔仗【法師限定】", 50, 2, 378, 0, 1260, ARMS, Object::objNum++, "2"),
-    new Object("月辰短劍【刺客限定】", 0, 0, 600, 0, 1260, ARMS, Object::objNum++, "3"),
-    new Object("守護者鎧甲【坦克限定】", 0, 0, 600, 0, 1260, BODY, Object::objNum++, "4"),
-    new Object("清泉劍【傳說武器】", 0, 0, 1000, 0, 0, ARMS, Object::objNum++, "0"),
-    new Object("清泉盔甲【傳說裝備】", 500, 10, 0, 0, 0, BODY, Object::objNum++, "0"),
-    new Object("清泉護腿【傳說裝備】", 500, 5, 0, 0, 0, LEG, Object::objNum++, "0"),
-    new Object("長生劍【傳說武器】", 500, 20, 2000, 0, 0, ARMS, Object::objNum++, "0"),
+    new Object("金蘋果", 10, 10, 10, 10000, 50, EAT, Object::objNum++, "0"),                // 0
+    new Object("木劍", 0, 0, 10, 0, 100, ARMS, Object::objNum++, "0"),                      // 1
+    new Object("鐵劍", 0, 0, 60, 0, 1000, ARMS, Object::objNum++, "0"),                     // 2
+    new Object("火腿", 10, 10, 10, 20000, 10, EAT, Object::objNum++, "0"),                  // 3
+    new Object("治療藥水【小】", 100, 0, 0, 0, 500, EAT, Object::objNum++, "0"),            // 4
+    new Object("治療藥水【中】", 2000, 0, 0, 0, 5000, EAT, Object::objNum++, "0"),          // 5
+    new Object("治療藥水【大】", 5000, 0, 0, 0, 10000, EAT, Object::objNum++, "0"),         // 6
+    new Object("鐵裝", 500, 15, 0, 0, 2000, BODY, Object::objNum++, "0"),                   // 7
+    new Object("皮革裝", 100, 4, 0, 0, 500, BODY, Object::objNum++, "0"),                   // 8
+    new Object("大砍刀【戰士限定】", 100, 10, 100, 0, 1260, ARMS, Object::objNum++, "1"),   // 9
+    new Object("瑪娜魔仗【法師限定】", 50, 2, 378, 0, 1260, ARMS, Object::objNum++, "2"),   // 10
+    new Object("月辰短劍【刺客限定】", 0, 0, 600, 0, 1260, ARMS, Object::objNum++, "3"),    // 11
+    new Object("守護者鎧甲【坦克限定】", 0, 0, 600, 0, 1260, BODY, Object::objNum++, "4"),  // 12
+    new Object("清泉劍【傳說武器】", 0, 0, 1000, 0, 0, ARMS, Object::objNum++, "0"),        // 13
+    new Object("清泉盔甲【傳說裝備】", 500, 10, 0, 0, 0, BODY, Object::objNum++, "0"),      // 14
+    new Object("清泉護腿【傳說裝備】", 500, 5, 0, 0, 0, LEG, Object::objNum++, "0"),        // 15
+    new Object("長生劍【傳說武器】", 500, 20, 2000, 0, 0, ARMS, Object::objNum++, "0"),     // 16
 };
 
 Object::~Object() {
@@ -101,25 +101,25 @@ int Object::eat() {
 }
 
 void Object::use(int lv) {  // just for use item not eat.
-    globalVar::user->jb->chCurAP(addAP*lv);
-    globalVar::user->jb->chCurHP(addHP*lv);
-    globalVar::user->jb->chCurDF(addDF*lv);
+    globalVar::user->jb->chCurAP(addAP * lv);
+    globalVar::user->jb->chCurHP(addHP * lv);
+    globalVar::user->jb->chCurDF(addDF * lv);
     globalVar::screen->printMapMes("你裝備了<" + name + ">");
     globalVar::screen->printMapMes(
-        "HP:" + std::to_string(addHP*lv) + " " +
-        "AP:" + std::to_string(addAP*lv) + " " +
-        "DF:" + std::to_string(addDF*lv));
+        "HP:" + std::to_string(addHP * lv) + " " +
+        "AP:" + std::to_string(addAP * lv) + " " +
+        "DF:" + std::to_string(addDF * lv));
 }
 
 void Object::deuse(int lv) {  // just for use item not eat.
-    globalVar::user->jb->chCurAP(-addAP*lv);
-    globalVar::user->jb->chCurHP(-addHP*lv);
-    globalVar::user->jb->chCurDF(-addDF*lv);
+    globalVar::user->jb->chCurAP(-addAP * lv);
+    globalVar::user->jb->chCurHP(-addHP * lv);
+    globalVar::user->jb->chCurDF(-addDF * lv);
     globalVar::screen->printMapMes("你脫下了<" + name + ">");
     globalVar::screen->printMapMes(
-        "HP:" + std::to_string(-addHP*lv) + " " +
-        "AP:" + std::to_string(-addAP*lv) + " " +
-        "DF:" + std::to_string(-addDF*lv));
+        "HP:" + std::to_string(-addHP * lv) + " " +
+        "AP:" + std::to_string(-addAP * lv) + " " +
+        "DF:" + std::to_string(-addDF * lv));
 }
 
 #endif

@@ -20,6 +20,7 @@ void Fight::getFightWithMonsId(int id) {
     bool state = true;
     bool atkPri = (rand() % 5) != 0;
     int atkNum = 0, suckBlood = 0;
+    int run = 0;
 
     Monster* curMonster = getMonsterByID(id);
     if (curMonster == nullptr) {
@@ -59,6 +60,8 @@ void Fight::getFightWithMonsId(int id) {
                     ;
             }
         }
+        if (!run && !globalVar::user->isSkillFull())
+            run = 5;  // 每五回合回復一次技能點數
         if (atkNum) {
             --atkNum;
             atkPri = true;
@@ -71,7 +74,7 @@ void Fight::getFightWithMonsId(int id) {
                 globalVar::screen->printMapMes(
                     "你憤力一擊對【 " + curMonster->getMonstName() +
                     " 】造成< " + std::to_string(dmg) + " >點爆擊傷害!!! 【爆擊】");
-            } else if (rate < 1 - globalVar::user->getCritiCalRate()) {  // 普攻
+            } else if (rate < (0.95 - globalVar::user->getCritiCalRate())) {  // 普攻
                 dmg = curMonster->deHP_m(playerAtk);
                 globalVar::screen->printMapMes(
                     "你出手攻擊對【 " + curMonster->getMonstName() +
@@ -80,6 +83,8 @@ void Fight::getFightWithMonsId(int id) {
                 globalVar::screen->printMapMes(
                     "你發動攻擊但【" + curMonster->getMonstName() + "】身手敏捷躲避了攻擊!!! 【閃躲】");
             }
+            if (!(run--))
+                globalVar::user->incSkillPoint();
 
             if (suckBlood) {
                 --suckBlood;
@@ -96,7 +101,7 @@ void Fight::getFightWithMonsId(int id) {
 
             curMonster->showInfo_m();
             if (curMonster->getCurHP_m() <= 0.5) {  // 殺掉
-                if (rand()/(RAND_MAX+1.0) <= curMonster->getFallRate()) {  // 50%掉裝
+                if (rand()/(RAND_MAX+1.0) <= curMonster->getFallRate()) {  // 掉裝
                     globalVar::screen->printMapMes(
                         "成功掉落【"+
                         objList[curMonster->getFallItemNum()]->getName()+"】");

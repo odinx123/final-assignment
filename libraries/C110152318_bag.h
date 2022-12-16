@@ -147,15 +147,32 @@ int Bag::useBagItem(int idx, int lv, bool s) {  // todo
     } else {
         if (s) {  // 傳進來true就是穿裝命令
             state = wareItem(idx, lv);
-            if (state == -1)
+            if (state == -1) {
                 globalVar::screen->printMapMes("這位部位已經有裝備了!!!");
+            } else if (weapon.first == 13 && chestplate.first == 14 && pants.first == 15) {
+                globalVar::screen->printMapMes("觸發套裝效果【清泉之力】");
+                globalVar::screen->printMapMes("<HP: 1000, DF: 5, AP: 500>，爆擊率上升20%!!!");
+                globalVar::user->jb->chCurAP(500);
+                globalVar::user->jb->chCurDF(5);
+                globalVar::user->jb->chCurHP(1000);
+                globalVar::user->incCritiCalRate(0.2);
+            }
             globalVar::screen->printMapMes(" ");
         } else {
+            bool set = weapon.first == 13 && chestplate.first == 14 && pants.first == 15;
             state = deWareItem(idx, lv);
             if (state == -1)
                 globalVar::screen->printMapMes("這個部位沒有穿上裝備!!!");
             else if (state == -2)
                 globalVar::screen->printMapMes("你沒有穿上【"+objList[idx]->getName()+"】!!!");
+            else if (set) {
+                globalVar::screen->printMapMes("套裝效果消失!!!");
+                globalVar::screen->printMapMes("<HP: -500, DF: -5, AP: -500>，爆擊率-20%!!!");
+                globalVar::user->jb->chCurAP(-500);
+                globalVar::user->jb->chCurDF(-5);
+                globalVar::user->jb->chCurHP(-1000);
+                globalVar::user->incCritiCalRate(-0.2);
+            }
             globalVar::screen->printMapMes(" ");
         }
     }
@@ -168,15 +185,25 @@ void Bag::saveBagItem() {
     auto& userBag = globalVar::jin["account"][globalVar::user->getCurId()]["job"][globalVar::user->getCurJob()]["bag"];
     auto& store = globalVar::jin["account"][globalVar::user->getCurId()]["store"];
 
-    if (weapon.first != -1)
-        deWareItem(weapon.first, weapon.second);
-    if (chestplate.first != -1)
-        deWareItem(chestplate.first, chestplate.second);
-    if (pants.first != -1)
-        deWareItem(pants.first, pants.second);
+    // 脫裝備
+    // if (weapon.first != -1)
+    //     deWareItem(weapon.first, weapon.second);
+    // if (chestplate.first != -1)
+    //     deWareItem(chestplate.first, chestplate.second);
+    // if (pants.first != -1)
+    //     deWareItem(pants.first, pants.second);
 
-    for (const auto& o : bagList)
-        userBag[std::to_string(o.first.first)][std::to_string(o.first.second)] = o.second;
+    for (const auto& o : bagList) {
+        std::string number = std::to_string(o.first.first);
+        bool ware = false;
+        if (o.first == weapon || o.first == chestplate || o.first == pants)
+            ware = true;
+        userBag[number] = nlohmann::json{
+            {std::to_string(o.first.second), o.second},
+            {"ware", ware}
+        };
+        // userBag[number][std::to_string(o.first.second)] = o.second;
+    }
     for (const auto& o : storeHouse)
         store[std::to_string(o.first.first)][std::to_string(o.first.second)] = o.second;
 
@@ -188,24 +215,28 @@ void Bag::saveBagItem() {
 void Bag::remItemFromStoreHouse(int idx, int lv) {
     std::string ID = globalVar::user->getCurId();
     auto &store = globalVar::jin["account"][ID]["store"];
-    if (store.count(std::to_string(idx)) <= 0 ||
-        store[std::to_string(idx)].count(std::to_string(lv)) <= 0) return;
-    store[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
-    storeHouse.erase({idx, lv});
+    if (store.count(std::to_string(idx)) > 0 &&
+        store[std::to_string(idx)].count(std::to_string(lv)) > 0)
+        store[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
     if (store[std::to_string(idx)].is_null())  // 如果刪除後idx裡面沒有value就刪除
         store.erase(std::to_string(idx));
+    if (storeHouse.count(std::make_pair(idx, lv)) > 0)
+        storeHouse.erase({idx, lv});
+    globalVar::screen->printMapMes("已經將【"+objList[idx]->getName()+"】移除!!!");
+    globalVar::screen->printMapMes(" ");
 }
 
 void Bag::eraseBagItemFromData(int idx, int lv) {
     std::string ID = globalVar::user->getCurId();
     std::string job = globalVar::user->getCurJob();
     auto &userBag = globalVar::jin["account"][ID]["job"][job]["bag"];
-    if (userBag.count(std::to_string(idx)) <= 0 ||
-        userBag[std::to_string(idx)].count(std::to_string(lv)) <= 0) return;
-    userBag[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
-    bagList.erase({idx, lv});
+    if (userBag.count(std::to_string(idx)) > 0 &&
+        userBag[std::to_string(idx)].count(std::to_string(lv)) > 0)
+        userBag[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
     if (userBag[std::to_string(idx)].is_null())  // 如果刪除後idx裡面沒有value就刪除
         userBag.erase(std::to_string(idx));
+    if (bagList.count(std::make_pair(idx, lv)) > 0)
+        bagList.erase({idx, lv});
 }
 
 // todo  chagne job ware equip.
@@ -214,9 +245,29 @@ void Bag::loadBagItem() {
     std::string job = globalVar::user->getCurJob();
     auto& userID = globalVar::jin["account"][id]["job"][job];
     auto& userStore = globalVar::jin["account"][id]["store"];
-    for (const auto& o : userID["bag"].items())  // 把json的資料讀進bagList
-        for (const auto& oj : o.value().items())
-            bagList[{std::stoi(o.key()), std::stoi(oj.key())}] = oj.value();
+    for (const auto& o : userID["bag"].items()) { // 把json的資料讀進bagList
+        // o.key()是物品編號
+        // value有以Lv為主的key跟是否有穿上的key
+        int number = std::stoi(o.key());
+        for (const auto& oj : o.value().items()) {  // 走訪他的value
+            // oj.key()有Lv跟ware, value則是各自的狀態
+            if (oj.key() != "ware") {
+                int lv = std::stoi(oj.key());
+                bagList[{number, lv}] = oj.value();
+                if (o.value()["ware"]) {
+                    auto kkey = std::make_pair(number, lv);
+                    int type = objList[number]->getType();
+                    if (type == ARMS) {
+                        weapon = kkey;
+                    } else if (type == BODY) {
+                        chestplate = kkey;
+                    } else if (type == LEG) {
+                        pants = kkey;
+                    }
+                }
+            }
+        }
+    }
     for (const auto& o : userStore.items())  // 把json的資料讀進storeHouse
         for (const auto& oj : o.value().items())
             storeHouse[{std::stoi(o.key()), std::stoi(oj.key())}] = oj.value();
@@ -336,6 +387,10 @@ void Bag::getObjFromStoreHouse(int idx, int lv) {
     }
     if (storeHouse.count({idx, lv}) <= 0) {
         globalVar::screen->printMapMes("你沒有這件裝備!!!");
+        return;
+    }
+    if (bagList.size() >= MAXBAGNUM) {
+        globalVar::screen->printMapMes("你的背包大小不足!!!");
         return;
     }
 

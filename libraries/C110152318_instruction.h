@@ -286,12 +286,12 @@ int funcThrow(const std::vector<std::string>& tokens) {
     globalVar::screen->setInfoCursorPos(0, 5);
     std::getline(std::cin, ins);
     if (ins.size() != 1) {
-        globalVar::screen->clearMes(0, 4, 30);
+        globalVar::screen->clearMes(0, 4, 27);
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
-    globalVar::screen->clearMes(0, 4, 30);
+    globalVar::screen->clearMes(0, 4, 27);
     globalVar::screen->clearMes(0, 5, 10);
 
     globalVar::screen->setCursorVisible(false);
@@ -493,7 +493,7 @@ int funcStoreHouse(const std::vector<std::string>& tokens) {
             globalVar::bg->getObjFromStoreHouse(index, lv);
             break;
         case 2:
-            globalVar::bg->remItemFromStoreHouse(index, lv);
+            globalVar::bg->remItemFromStoreHouse(index, lv);  // bug
             break;
     }
     globalVar::screen->printMapMes(" ");

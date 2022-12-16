@@ -70,6 +70,10 @@ class User {
     void incCritiCalRate(int rate) { CRT_Rate += rate; }
     void decCritiCalRate(int rate) { CRT_Rate -= rate; }
     double getCritiCalDmg() { return CRT_dmg; }
+    void incCritiCalDmg(double dmg) { CRT_dmg += dmg; }
+    void decCritiCalDmg(double dmg) { CRT_dmg -= dmg;}
+    void incSkillPoint() { skillPoint += (((skillPoint+1) <= (level/5)) ? 1 : 0); }
+    bool isSkillFull() const { return skillPoint >= level/5; }
 };
 
 User::User() {
@@ -85,6 +89,7 @@ User::User() {
 
     login();
 
+    // 爆擊率、爆傷
     if (number == WARRIOR) {
         CRT_Rate = 0.2;
         CRT_dmg = 0.75*(level/5.0);
@@ -131,7 +136,8 @@ void User::login() {
             // todo
             // waitAni("登入中");
         } else {
-            globalVar::screen->clearMap();
+            // globalVar::screen->clearMap();
+            system("cls");
             std::cout << "登入失敗!!!\n請重設密碼!\n新密碼: ";
             t = 2;
             std::string prePasswd;
@@ -291,9 +297,8 @@ void User::changeJob() {
 void User::expUp(double l) {
     EXP += l;
     while (level < MAXLEVEL && (fabs(needEXP - EXP) <= 0.0001 || EXP >= needEXP)) {
-        ++level;
+        skillPoint = (++level)/5;  // 技能點數
         EXP -= needEXP;
-        ++skillPoint;  // 技能點數
         jb->setLevelStatus();
         if (level < MAXLEVEL)
             needEXP += (needEXP * 0.1 + 3000) * 0.2 + 10;
@@ -355,7 +360,7 @@ void User::showEXP(SHORT x, SHORT y) const {
     }
     globalVar::screen->setColor();
     globalVar::screen->setMes(
-        "擊殺: " + std::to_string(totleKill) + " 技能點: " + std::to_string(skillPoint), x, y+2);
+        "擊殺: " + std::to_string(totleKill) + " 技能點: " + std::to_string(skillPoint)+"   ", x, y+2);
 }
 
 int User::useSkill() {

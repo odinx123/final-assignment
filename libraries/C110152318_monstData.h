@@ -31,6 +31,7 @@ struct MonstData {
 int MonstData::curMonsNum = 0;
 int gapSize_ = 0, gapHP = 0, gapDF = 0, gapAP = 0;
 
+// 怪物設定
 MonstData ranInfo[] = {  // todo
     // 名稱、血量、防禦、傷害、EXP、出現率(按比例計算)、金錢、掉裝(-1不掉裝)、掉裝率
     MonstData("殭屍", 20, 5, 10, 53, 30, 12, -1, -1),
@@ -41,7 +42,7 @@ MonstData ranInfo[] = {  // todo
     MonstData("千年妖精", 100000, 80, 400, 3479, 1, 1000, 16, 0.05),
     MonstData("魔王", 73842983, 30, 1599, 12045, -1, 12487, -1, -1),
     MonstData("機器人【魔王幹部】", 3842983, 30, 1670, 5523, -1, 6543, 15, 0.05),
-    MonstData("陵寢巫師", 603845, 10, 1299, 8598, -1, 3433, 14, 0.05)
+    MonstData("陵寢巫師", 603845, 10, 1299, 8598, -1, 3433, 14, 0.5)
 };
 
 void genAnyNumMons(int n);

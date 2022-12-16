@@ -8,7 +8,7 @@
 using namespace std;
 
 void initializeGame();
-inline void genMonster();
+void genMonster();
 BOOL CtrlHandler(DWORD fdwCtrlType);
 
 int main() {
@@ -46,6 +46,7 @@ int main() {
         globalVar::screen->clearAllMap();
         globalVar::screen->displayMap();
         globalVar::user->showInfo();
+        globalVar::user->incSkillPoint();
         genMonster();
         setfps(60);
     }
@@ -89,16 +90,27 @@ void genMonster() {
     if (globalVar::screen->getCurCity() == "market") return;
     // todo
     // gen monster
-    // if (globalVar::screen->getCurCity() == "DemonCity") {
-    //     globalVar::monsterList.emplace_back(new Monster(
-    //         ranInfo[pos].name, ranInfo[pos].HP, ranInfo[pos].DF, ranInfo[pos].AP,
-    //         MonstData::curMonsNum, ranInfo[pos].EXP));
-    // }
-    // if (globalVar::screen->getCurCity() == "desertTemple" && globalVar::genMons) {
-    // }
-    if (globalVar::genMons) {  // 刷新地圖時候
+    MonstData::curMonsNum = 0;  // 編號歸零
+    if (globalVar::screen->getCurCity() == "DemonCity") {
+        globalVar::monsterList.emplace_back(new Monster(
+            ranInfo[7].name, ranInfo[7].HP, ranInfo[7].DF, ranInfo[7].AP,
+            MonstData::curMonsNum++, ranInfo[7].EXP, ranInfo[7].coin, 
+            ranInfo[7].itemFallNum, ranInfo[7].fallRate));
+        globalVar::monsterList.emplace_back(new Monster(
+            ranInfo[6].name, ranInfo[6].HP, ranInfo[6].DF, ranInfo[6].AP,
+            MonstData::curMonsNum++, ranInfo[6].EXP, ranInfo[6].coin, 
+            ranInfo[6].itemFallNum, ranInfo[6].fallRate));
+        globalVar::screen->printMapMes("你來到了魔王城!!!");
+        globalVar::screen->printMapMes(" ");
+    } else if (globalVar::screen->getCurCity() == "desertTemple") {
+        globalVar::screen->printMapMes("好像有怪物藏在暗處!!!");
+        globalVar::monsterList.emplace_back(new Monster(
+            ranInfo[8].name, ranInfo[8].HP, ranInfo[8].DF, ranInfo[8].AP,
+            MonstData::curMonsNum++, ranInfo[8].EXP, ranInfo[8].coin, 
+            ranInfo[8].itemFallNum, ranInfo[8].fallRate));
+        globalVar::screen->printMapMes(" ");
+    } else if (globalVar::genMons) {  // 刷新地圖時候
         globalVar::screen->printMapMes("怪物資訊:");
-        MonstData::curMonsNum = 0;
         // globalVar::monsterList.resize(MONSIZE, nullptr);
         int n = rand()%MONSIZE+3;
         globalVar::screen->printMapMes("數量: "+to_string(n));
