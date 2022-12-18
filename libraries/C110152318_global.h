@@ -24,6 +24,7 @@ namespace globalVar {
     std::vector<Monster*> monsterList;
     std::vector<double> chance_m;
     int killNum = 0;
+    bool set = false;
 
     // class
     User* user = nullptr;

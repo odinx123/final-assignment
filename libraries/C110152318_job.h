@@ -205,7 +205,7 @@ void Job::conSubAP(double ap, int ms) {
 void Job::showHP() {
     // globalVar::screen->clearMes(infoX, infoY, 20);
     globalVar::screen->setMes(
-        "血量: " + std::to_string(int(curHP)) + '/' + std::to_string(int(HP))+std::string(7, ' '), infoX, infoY + 1);
+        "血量: " + std::to_string(int(curHP)) + '/' + std::to_string(int(HP)) + std::string(7, ' '), infoX, infoY + 1);
 }
 
 void Job::showDF() {
@@ -330,8 +330,10 @@ double Job::addDF(double df) {
     if (DF + df > MAXDEF) {
         gap = MAXDEF - DF;
         baseDF = DF = curDF = MAXDEF;
-    } else
-        baseDF = curDF = DF += df;
+    } else {
+        curDF = DF += df;
+        baseDF += df;
+    }
     return gap;
 }
 
@@ -340,8 +342,10 @@ double Job::subDF(double df) {
     if (DF - df < 0) {
         gap = DF;
         baseDF = DF = curDF = 0;
-    } else
-        baseDF = curDF = DF -= df;
+    } else {
+        curDF = DF -= df;
+        baseDF -= df;
+    }
     return gap;
 }
 
@@ -350,8 +354,10 @@ double Job::addAP(double ap) {
     if (AP + ap > MAXATK) {
         gap = MAXATK - AP;
         baseAP = AP = curAP = MAXATK;
-    } else
-        baseAP = curAP = AP += ap;
+    } else {
+        curAP = AP += ap;
+        baseAP += ap;
+    }
     return gap;
 }
 
@@ -359,24 +365,25 @@ double Job::subAP(double ap) {
     int gap = ap;
     if (AP - ap < 0) {
         gap = AP;
-        baseAP = AP = curAP = 0;
+        AP = curAP = 0;
     } else
-        baseAP = curAP = AP += ap;
+        curAP = AP -= ap;
     return gap;
 }
 
 double Job::subHP(double hp) {
     int gap = hp;
     if (HP - hp <= 0) {
-        gap = AP-1;
-        baseHP = HP = curHP = 1;
+        gap = AP - 1;
+        HP = curHP = 1;
     } else
-        baseHP = curHP = HP += hp;
+        curHP = HP += hp;
     return gap;
 }
 
 double Job::addHP(double hp) {
-    baseHP = curHP = HP += hp;
+    curHP = HP += hp;
+    baseHP += hp;
     return hp;
 }
 

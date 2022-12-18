@@ -38,11 +38,11 @@ class Bag {
     int useBagItem(int idx, int lv, bool s);
     int getBagNum() { return bagList.size(); }
     bool isBagCanUse() { return bagList.size() != 0; }
-    void saveBagItem();
-    inline void eraseBagItemFromData(int idx, int lv);
-    void loadBagItem();
+    void saveBagItem();  // bug
+    void loadBagItem();  // bug
+    inline int eraseBagItemFromData(int idx, int lv);
     // 0 for eat, 1 for use.
-    int getTypeByIdx(int idx) { return shopList[idx]->getType(); }
+    int getTypeByIdx(int idx) { return (idx < objList.size() && idx >= 0) ? objList[idx]->getType() : -1; }
     inline void throwOut(int idx, int lv);
     inline void addBagItemByIdx(int idx, int lv);
     // 成功穿上裝備回傳0，反之則為-1
@@ -55,6 +55,11 @@ class Bag {
     void getObjFromStoreHouse(int idx, int lv);
     void showStoreHouse() const;
     int getStoreNum() { return storeHouse.size(); }
+    void setChangeStatus();
+    void deSetChangeStatus();
+    int getItemNum(int idx, int lv) { return bagList[{idx, lv}]; }
+    bool isItemExist(int idx, int lv) const { return bagList.count({idx, lv}) > 0; }
+    void levelUP(int idx, int lv, int cost);
 };
 
 Bag::Bag() {
@@ -101,16 +106,15 @@ void Bag::showBagList() const {
         globalVar::screen->printMapMes(
             std::to_string(s.first.first) + ": " + name + std::string(n, ' ') +
             "數量: " + std::to_string(s.second) +
-            ((objList[s.first.first]->getType()) ?
-            ("  Lv:" + std::to_string(s.first.second) +
-            ((s.first == weapon || s.first == chestplate || s.first == pants) ? " 已裝備" : "")) : " ")
-        );
+            ((objList[s.first.first]->getType()) ? ("  Lv:" + std::to_string(s.first.second) +
+                                                    ((s.first == weapon || s.first == chestplate || s.first == pants) ? " 已裝備" : ""))
+                                                 : " "));
     }
 }
 
 int Bag::buy(int n, int lv) {
     if (n < 0 || n >= shopList.size()) return 2;
-    if (bagList.size() >= MAXBAGNUM) return 3;
+    if (bagList.size() >= MAXBAGNUM && bagList.count({n, lv}) <= 0) return 3;
     if (globalVar::user->getCoin() < shopList[n]->getCoin()) return 1;
     if (shopList[n]->getJobNumber() != globalVar::user->getCurJob() &&
         shopList[n]->getJobNumber() != "0") return 4;
@@ -148,14 +152,30 @@ int Bag::useBagItem(int idx, int lv, bool s) {  // todo
         if (s) {  // 傳進來true就是穿裝命令
             state = wareItem(idx, lv);
             if (state == -1) {
-                globalVar::screen->printMapMes("這位部位已經有裝備了!!!");
+                // 要先脫裝在穿
+                // globalVar::screen->printMapMes("這位部位已經有裝備了!!!");
+
+                // 穿上裝備自動替換 /*
+                bool set = weapon.first == 13 && chestplate.first == 14 && pants.first == 15;
+                globalVar::screen->printMapMes("裝備已被替換掉!!!");
+                switch (objList[idx]->getType()) {  // 判斷要脫下哪個裝備(傳進來的穿上的不一定一樣)
+                    case ARMS:
+                        deWareItem(weapon.first, weapon.second);
+                        break;
+                    case BODY:
+                        deWareItem(chestplate.first, chestplate.second);
+                        break;
+                    case LEG:
+                        deWareItem(pants.first, pants.second);
+                        break;
+                }
+                if (set)                  // 如果脫下裝備前是套裝效果
+                    deSetChangeStatus();  // 清除套裝效果(因為要先脫下再穿)
+                wareItem(idx, lv);        // 穿上
+                setChangeStatus();        // 穿上後如果是套裝效果
+                // 穿上裝備自動替換 */
             } else if (weapon.first == 13 && chestplate.first == 14 && pants.first == 15) {
-                globalVar::screen->printMapMes("觸發套裝效果【清泉之力】");
-                globalVar::screen->printMapMes("<HP: 1000, DF: 5, AP: 500>，爆擊率上升20%!!!");
-                globalVar::user->jb->chCurAP(500);
-                globalVar::user->jb->chCurDF(5);
-                globalVar::user->jb->chCurHP(1000);
-                globalVar::user->incCritiCalRate(0.2);
+                setChangeStatus();  // 清泉套裝效果
             }
             globalVar::screen->printMapMes(" ");
         } else {
@@ -164,14 +184,9 @@ int Bag::useBagItem(int idx, int lv, bool s) {  // todo
             if (state == -1)
                 globalVar::screen->printMapMes("這個部位沒有穿上裝備!!!");
             else if (state == -2)
-                globalVar::screen->printMapMes("你沒有穿上【"+objList[idx]->getName()+"】!!!");
+                globalVar::screen->printMapMes("你沒有穿上【" + objList[idx]->getName() + "】!!!");
             else if (set) {
-                globalVar::screen->printMapMes("套裝效果消失!!!");
-                globalVar::screen->printMapMes("<HP: -500, DF: -5, AP: -500>，爆擊率-20%!!!");
-                globalVar::user->jb->chCurAP(-500);
-                globalVar::user->jb->chCurDF(-5);
-                globalVar::user->jb->chCurHP(-1000);
-                globalVar::user->incCritiCalRate(-0.2);
+                deSetChangeStatus();  // 取消套裝效果
             }
             globalVar::screen->printMapMes(" ");
         }
@@ -193,19 +208,23 @@ void Bag::saveBagItem() {
     // if (pants.first != -1)
     //     deWareItem(pants.first, pants.second);
 
-    for (const auto& o : bagList) {
+    for (const auto& o : bagList) {  // 每次都會有 {pair, lv} 的key代表一個裝備
         std::string number = std::to_string(o.first.first);
+        std::string lv = std::to_string(o.first.second);
         bool ware = false;
         if (o.first == weapon || o.first == chestplate || o.first == pants)
             ware = true;
-        userBag[number] = nlohmann::json{
-            {std::to_string(o.first.second), o.second},
-            {"ware", ware}
-        };
-        // userBag[number][std::to_string(o.first.second)] = o.second;
+        // 跟map一樣json在key的地方加上新的key會直接新增，若是寫在後面會直接被覆蓋
+        userBag[number][lv] = nlohmann::json{// lv底下還要有【數量跟ware】
+                                             {"ware", ware},
+                                             {"number", o.second}};
     }
-    for (const auto& o : storeHouse)
-        store[std::to_string(o.first.first)][std::to_string(o.first.second)] = o.second;
+    for (const auto& o : storeHouse) {
+        std::string number = std::to_string(o.first.first);
+        std::string lv = std::to_string(o.first.second);
+        store[number][lv] = o.second;  // lv底下只要有數量就可以
+    }
+    // store[std::to_string(o.first.first)][std::to_string(o.first.second)] = o.second;
 
     globalVar::file_out.open(path);
     globalVar::file_out << globalVar::jin.dump(4) << std::endl;
@@ -214,29 +233,32 @@ void Bag::saveBagItem() {
 
 void Bag::remItemFromStoreHouse(int idx, int lv) {
     std::string ID = globalVar::user->getCurId();
-    auto &store = globalVar::jin["account"][ID]["store"];
+    auto& store = globalVar::jin["account"][ID]["store"];
     if (store.count(std::to_string(idx)) > 0 &&
         store[std::to_string(idx)].count(std::to_string(lv)) > 0)
         store[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
-    if (store[std::to_string(idx)].is_null())  // 如果刪除後idx裡面沒有value就刪除
+    if (store[std::to_string(idx)].is_null())                  // 如果刪除後idx裡面沒有value就刪除
         store.erase(std::to_string(idx));
     if (storeHouse.count(std::make_pair(idx, lv)) > 0)
         storeHouse.erase({idx, lv});
-    globalVar::screen->printMapMes("已經將【"+objList[idx]->getName()+"】移除!!!");
+    globalVar::screen->printMapMes("已經將【" + objList[idx]->getName() + "】移除!!!");
     globalVar::screen->printMapMes(" ");
 }
 
-void Bag::eraseBagItemFromData(int idx, int lv) {
+int Bag::eraseBagItemFromData(int idx, int lv) {
     std::string ID = globalVar::user->getCurId();
     std::string job = globalVar::user->getCurJob();
-    auto &userBag = globalVar::jin["account"][ID]["job"][job]["bag"];
+    auto& userBag = globalVar::jin["account"][ID]["job"][job]["bag"];
     if (userBag.count(std::to_string(idx)) > 0 &&
         userBag[std::to_string(idx)].count(std::to_string(lv)) > 0)
         userBag[std::to_string(idx)].erase(std::to_string(lv));  // 刪除idx中的lv等
-    if (userBag[std::to_string(idx)].is_null())  // 如果刪除後idx裡面沒有value就刪除
+    if (userBag[std::to_string(idx)].is_null())                  // 如果刪除後idx裡面沒有value就刪除
         userBag.erase(std::to_string(idx));
-    if (bagList.count(std::make_pair(idx, lv)) > 0)
+    if (bagList.count(std::make_pair(idx, lv)) > 0) {
         bagList.erase({idx, lv});
+        return 0;
+    }
+    return 1;
 }
 
 // todo  chagne job ware equip.
@@ -245,29 +267,34 @@ void Bag::loadBagItem() {
     std::string job = globalVar::user->getCurJob();
     auto& userID = globalVar::jin["account"][id]["job"][job];
     auto& userStore = globalVar::jin["account"][id]["store"];
-    for (const auto& o : userID["bag"].items()) { // 把json的資料讀進bagList
+    for (const auto& o : userID["bag"].items()) {  // 把json的資料讀進bagList
         // o.key()是物品編號
-        // value有以Lv為主的key跟是否有穿上的key
+        // value是Lv的json
         int number = std::stoi(o.key());
         for (const auto& oj : o.value().items()) {  // 走訪他的value
-            // oj.key()有Lv跟ware, value則是各自的狀態
-            if (oj.key() != "ware") {
-                int lv = std::stoi(oj.key());
-                bagList[{number, lv}] = oj.value();
-                if (o.value()["ware"]) {
-                    auto kkey = std::make_pair(number, lv);
-                    int type = objList[number]->getType();
-                    if (type == ARMS) {
-                        weapon = kkey;
-                    } else if (type == BODY) {
-                        chestplate = kkey;
-                    } else if (type == LEG) {
-                        pants = kkey;
-                    }
+            // oj.key()是lv
+            // oj.value()是有num跟ware的json
+            int lv = std::stoi(oj.key());
+            int num = oj.value()["number"];
+            bool ware = oj.value()["ware"];
+
+            bagList[{number, lv}] = number;  // 先放進背包
+            if (ware) {
+                auto kkey = std::make_pair(number, lv);
+                int type = objList[number]->getType();
+                if (type == ARMS) {
+                    weapon = kkey;
+                } else if (type == BODY) {
+                    chestplate = kkey;
+                } else if (type == LEG) {
+                    pants = kkey;
                 }
             }
         }
     }
+    globalVar::set = weapon.first == 13 && chestplate.first == 14 && pants.first == 15;
+    if (globalVar::set)
+        globalVar::user->incCritiCalRate(0.2);
     for (const auto& o : userStore.items())  // 把json的資料讀進storeHouse
         for (const auto& oj : o.value().items())
             storeHouse[{std::stoi(o.key()), std::stoi(oj.key())}] = oj.value();
@@ -364,7 +391,7 @@ void Bag::putItemToStoreHouse(int idx, int lv) {
         globalVar::screen->printMapMes(" ");
         return;
     }
-    if (storeHouse.size() >= MAXBAGNUM) {
+    if (storeHouse.size() >= MAXBAGNUM && storeHouse.count({idx, lv}) <= 0) {
         globalVar::screen->printMapMes("你的倉庫大小不足!!!");
         globalVar::screen->printMapMes(" ");
         return;
@@ -374,10 +401,9 @@ void Bag::putItemToStoreHouse(int idx, int lv) {
         globalVar::screen->printMapMes(" ");
         return;
     }
-    storeHouse[{idx, lv}] = bagList[{idx, lv}];
+    ++storeHouse[{idx, lv}];
     bagList.erase({idx, lv});
-    // storeHouse.insert({idx, bagList[idx]});
-    globalVar::screen->printMapMes("已經將【"+objList[idx]->getName()+"】放入倉庫");
+    globalVar::screen->printMapMes("已經將【" + objList[idx]->getName() + "】放入倉庫");
 }
 
 void Bag::getObjFromStoreHouse(int idx, int lv) {
@@ -389,14 +415,14 @@ void Bag::getObjFromStoreHouse(int idx, int lv) {
         globalVar::screen->printMapMes("你沒有這件裝備!!!");
         return;
     }
-    if (bagList.size() >= MAXBAGNUM) {
+    if (bagList.size() >= MAXBAGNUM && bagList.count({idx, lv}) <= 0) {
         globalVar::screen->printMapMes("你的背包大小不足!!!");
         return;
     }
 
-    globalVar::screen->printMapMes("已從倉庫將"+objList[idx]->getName()+"放入背包!!!");
-    bagList[{idx, lv}] = storeHouse[{idx, lv}];
-    storeHouse.erase({idx, lv});
+    globalVar::screen->printMapMes("已從倉庫將" + objList[idx]->getName() + "放入背包!!!");
+    ++bagList[{idx, lv}];
+    remItemFromStoreHouse(idx, lv);
 }
 
 void Bag::showStoreHouse() const {
@@ -413,11 +439,55 @@ void Bag::showStoreHouse() const {
         globalVar::screen->printMapMes(
             std::to_string(s.first.first) + ": " + name + std::string(n, ' ') +
             "數量: " + std::to_string(s.second) +
-            ((objList[s.first.first]->getType()) ?
-            ("  Lv:" + std::to_string(s.first.second) +
-            ((s.first == weapon || s.first == chestplate || s.first == pants) ? " 已裝備" : "")) : " ")
-        );
+            ((objList[s.first.first]->getType()) ? ("  Lv:" + std::to_string(s.first.second) +
+                                                    ((s.first == weapon || s.first == chestplate || s.first == pants) ? " 已裝備" : ""))
+                                                 : " "));
     }
+}
+
+void Bag::setChangeStatus() {
+    globalVar::set = weapon.first == 13 && chestplate.first == 14 && pants.first == 15;
+    if (globalVar::set) {  // 清全效果
+        globalVar::screen->printMapMes("觸發套裝效果【清泉之力】");
+        globalVar::screen->printMapMes("<HP: 1000, DF: 5, AP: 500>，爆擊率上升20%!!!");
+        globalVar::user->jb->chCurAP(500);
+        globalVar::user->jb->chCurDF(5);
+        globalVar::user->jb->chCurHP(1000);
+        globalVar::user->incCritiCalRate(0.2);
+    }
+}
+
+void Bag::deSetChangeStatus() {
+    globalVar::set = false;
+    globalVar::screen->printMapMes("套裝效果消失!!!");
+    globalVar::screen->printMapMes("<HP: -500, DF: -5, AP: -500>，爆擊率-20%!!!");
+    globalVar::user->jb->chCurAP(-500);
+    globalVar::user->jb->chCurDF(-5);
+    globalVar::user->jb->chCurHP(-1000);
+    globalVar::user->decCritiCalRate(0.2);
+}
+
+void Bag::levelUP(int idx, int lv, int cost) {
+    auto kkey = std::make_pair(idx, lv);
+    if (kkey == weapon || kkey == chestplate || kkey == pants) {  // 要先脫裝備
+        globalVar::screen->printMapMes("請先脫下裝備再進行升級!!!");
+        return;
+    }
+    if (bagList.size() >= MAXBAGNUM && bagList.count({idx, lv + 1}) <= 0 && bagList[kkey] > 1) {  // 升級後沒有位置且背包已達上限
+        globalVar::screen->printMapMes("背包大小不足!!!");
+        return;
+    }
+    if (lv < 5) {
+        globalVar::screen->printMapMes(
+            "成功將" + objList[idx]->getName() + "從 Lv:" + std::to_string(lv) +
+            "強化到 Lv:" + std::to_string(lv + 1));
+        if (--bagList[{idx, lv}] <= 0) {  // 如果升級後原本裝備不存在就刪除
+            eraseBagItemFromData(idx, lv);
+        }
+        ++bagList[{idx, lv + 1}];  // 把升級後的裝備加一
+        globalVar::user->changeCoin(-cost);
+    } else
+        globalVar::screen->printMapMes("等級已達上限!!!");
 }
 
 #endif

@@ -317,12 +317,12 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
         return 1;
     }
     if (globalVar::screen->getCurCity() != "modernCity") {
-        globalVar::screen->printMapMes("你需要找到老衲才可以升級技能!!!");
+        globalVar::screen->printMapMes("你需要找到老衲的技能商店才可以升級技能!!!");
         globalVar::screen->printMapMes(" ");
         return 0;
     }
 
-    int sklv = globalVar::user->getSklevel(), needCoin = std::pow(3, sklv) * 100;
+    int sklv = globalVar::user->getSklevel(), costSkill = sklv * 4;
 
     if (sklv >= MAXSKLEVEL) {
         globalVar::screen->printMapMes("你當前職業技能已經滿級");
@@ -331,7 +331,7 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
     }
 
     globalVar::screen->printMapMes(
-        "你需要 $" + std::to_string(needCoin) + " 個金幣來升級技能!!!");
+        "你需要 " + std::to_string(costSkill) + " 個【技能升級點】來升級技能!!!");
     globalVar::screen->printMapMes("是否繼續(按下Enter繼續/Esc取消)");
     char c;
     while (c = _getch()) {
@@ -340,15 +340,15 @@ int funcSkillUp(const std::vector<std::string>& tokens) {
             break;
         } else if (c == 13) {
             globalVar::screen->printMapMes("繼續升級");
-            if (round(globalVar::user->getCoin()) < sklv) {
-                globalVar::screen->printMapMes("你的錢不夠進行技能升級!!!");
+            if (globalVar::user->skillUpPoint < costSkill) {
+                globalVar::screen->printMapMes("你的【技能升級點】不夠進行技能升級!!!");
                 break;
             }
 
-            globalVar::screen->printMapMes(
+            globalVar::screen->printMapMes(  // todo  技能升級點數
                 "技能從 Lv" + std::to_string(sklv) +
                 " 升級到 Lv" + std::to_string(globalVar::user->incSklv()));
-            globalVar::user->changeCoin(needCoin);
+            globalVar::user->skillUpPoint -= costSkill;
             break;
         }
     }
@@ -364,8 +364,25 @@ int funcShowLevel(const std::vector<std::string>& tokens) {
         printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
+    int sklv = globalVar::user->getSklevel(), costSkill = sklv * 4;
     globalVar::screen->printMapMes(
-        "你的技能等級 Lv: " + std::to_string(globalVar::user->getSklevel()));
+        "你的技能" + globalVar::user->getSkillName() +
+        " Lv: " + (sklv >= MAXSKLEVEL ? "MAX" : std::to_string(sklv)) +
+        (globalVar::user->getLevel() >= 5 ? " 已習得" : " 尚未習得"));
+    globalVar::screen->printMapMes(
+        "技能效果: " + globalVar::user->getSkillEffect() +
+        "  使用需要消耗" + std::to_string(globalVar::user->getSklevel() * 5) + "點【技能點數】!!!");
+    if (sklv >= MAXSKLEVEL) {
+        globalVar::screen->printMapMes("你當前職業技能已經滿級");
+        globalVar::screen->printMapMes(" ");
+        return 0;
+    } else {
+        globalVar::screen->printMapMes(  // todo
+            "技能從 Lv" + std::to_string(sklv) +
+            " 升級到 Lv" + std::to_string(sklv + 1) + "需要" + std::to_string(costSkill) + "個【技能升級點】!!!");
+    }
+    globalVar::screen->printMapMes("你擁有" +
+                                   std::to_string(globalVar::user->skillUpPoint) + "個【技能升級點】");
     globalVar::screen->printMapMes(" ");
 
     return 0;
@@ -378,52 +395,18 @@ int funcLogOut(const std::vector<std::string>& tokens) {
         return 1;
     }
 
+    funcSave(tokens);
+    delete globalVar::bg;
+    delete globalVar::user;
     system("cls");
-    globalVar::screen->setStdCursorPos(0, 0);
-    std::cout << "從新登入(0)/離開遊戲(1): ";
-    std::string ins;
+    globalVar::user = new User();
+    globalVar::bg = new Bag;
 
-    globalVar::screen->setCursorVisible(true);
-    std::getline(std::cin, ins);
-    globalVar::screen->setCursorVisible(false);
-    if (ins.size() == 0) {
-        globalVar::screen->clearMes(0, 0, 30);
-        printMes("Command error!!!", 0, 0, 4);
-        globalVar::screen->printMapMes(" ");
-        return 1;
-    }
-
-    int index;
-    try {
-        index = stoi(ins);
-    } catch (const std::invalid_argument& e) {
-        globalVar::screen->clearMes(0, 0, 30);
-        printMes("Command error!!!", 0, 0, 4);
-        globalVar::screen->printMapMes(" ");
-        return 1;
-    }
-
-    if (index == 1) {
-        funcSave(tokens);
-        funcExit(tokens);
-        return -1;
-    } else if (index == 0) {
-        funcSave(tokens);
-        delete globalVar::bg;
-        delete globalVar::user;
-        system("cls");
-        globalVar::user = new User();
-        globalVar::bg = new Bag;
-    } else {
-        globalVar::screen->printMapMes("輸入錯誤!!!");
-    }
-    globalVar::screen->printMapMes(" ");
     return 0;
 }
 
 int funcStoreHouse(const std::vector<std::string>& tokens) {
-    if (tokens.size() != 2 || (tokens[1] != "put" && tokens[1] != "get" 
-                            && tokens[1] != "remove" && tokens[1] != "show")) {
+    if (tokens.size() != 2 || (tokens[1] != "put" && tokens[1] != "get" && tokens[1] != "remove" && tokens[1] != "show")) {
         globalVar::screen->clearMes(0, 0, 30);
         printMes("Command error!!!", 0, 0, 4);
         return 1;
@@ -493,10 +476,245 @@ int funcStoreHouse(const std::vector<std::string>& tokens) {
             globalVar::bg->getObjFromStoreHouse(index, lv);
             break;
         case 2:
-            globalVar::bg->remItemFromStoreHouse(index, lv);  // bug
+            globalVar::bg->remItemFromStoreHouse(index, lv);
             break;
     }
     globalVar::screen->printMapMes(" ");
+    return 0;
+}
+
+int funcShowAttribute(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    globalVar::screen->printMapMes(
+        "爆傷倍率: " + std::to_string(int(globalVar::user->getCritiCalDmg() * 100)) + "%");
+    globalVar::screen->printMapMes(
+        "爆擊率: " + std::to_string(int(globalVar::user->getCritiCalRate() * 100)) + "%");
+    globalVar::screen->printMapMes(" ");
+    return 0;
+}
+
+int funcSell(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    globalVar::screen->printMapMes("請選擇要販賣的物品!!!");
+    globalVar::bg->showBagList();
+
+    std::string ins;
+    globalVar::screen->setCursorVisible(true);
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    std::vector<std::string> list;
+    splitstring(ins, list, " ");
+    globalVar::screen->clearMes(0, 5, 10);
+    globalVar::screen->setCursorVisible(false);
+    if (ins.size() == 0 || list.size() > 2) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+
+    int index, lv = 1;
+    try {
+        index = stoi(list[0]);
+        if (list.size() == 2)
+            lv = stoi(list[1]);
+    } catch (const std::invalid_argument& e) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+
+    int s = globalVar::bg->eraseBagItemFromData(index, lv);
+    if (!s) {
+        globalVar::screen->printMapMes("販賣裝備成功獲得" +
+                                       std::to_string(globalVar::bg->getItemNum(index, lv) * 100 * lv) + "元!!!");
+        globalVar::user->changeCoin(globalVar::bg->getItemNum(index, lv) * 100 * lv);
+    } else {
+        globalVar::screen->printMapMes("你背包沒有這件裝備!!!");
+        globalVar::screen->printMapMes("你因為詐騙將賠償1000元，如果錢不夠將負債!!!");
+        globalVar::user->changeCoin(-1000);
+    }
+
+    globalVar::screen->printMapMes(" ");
+    return 0;
+}
+
+int funcEquipUp(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 1) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    globalVar::screen->printMapMes("請選擇要升級的裝備!!!");
+    globalVar::bg->showBagList();
+
+    std::string ins;
+    globalVar::screen->setCursorVisible(true);
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::getline(std::cin, ins);
+    std::vector<std::string> list;
+    splitstring(ins, list, " ");
+    globalVar::screen->clearMes(0, 5, 10);
+    globalVar::screen->setCursorVisible(false);
+    if (ins.size() == 0 || list.size() > 2) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+
+    int index, lv = 1;
+    try {
+        index = stoi(list[0]);
+        if (list.size() == 2)
+            lv = stoi(list[1]);
+    } catch (const std::invalid_argument& e) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
+
+    if (globalVar::bg->isItemExist(index, lv)) {
+        int n = globalVar::bg->getTypeByIdx(index);
+        if (n == EAT) {
+            globalVar::screen->printMapMes("無法強化這個物品!!!");
+        } else if (n != -1) {
+            int cost = pow(lv + 1, 8) + 100;
+            globalVar::screen->printMapMes("你需要花費 $" + std::to_string(cost) + " 元強化!!!");
+            globalVar::screen->printMapMes("是否繼續(按下Enter繼續/Esc取消)");
+            char c;
+            while (c = _getch()) {
+                if (c == 27) {
+                    globalVar::screen->printMapMes("取消升級!!!");
+                    break;
+                } else if (c == 13) {
+                    if (globalVar::user->getCoin() < cost) {
+                        globalVar::screen->printMapMes("你的金錢不夠!!!");
+                        break;
+                    }
+                    globalVar::screen->printMapMes("花費 $" + std::to_string(cost) + " 繼續強化裝備");
+                    globalVar::bg->levelUP(index, lv, cost);
+                    break;
+                }
+            }
+        }
+    } else {
+        globalVar::screen->printMapMes("裝備不存在!!!");
+    }
+    globalVar::screen->printMapMes(" ");
+
+    return 0;
+}
+
+int funcAttributeUp(const std::vector<std::string>& tokens) {
+    if (tokens.size() > 2) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+    std::string HPStr, DFStr, APStr, HPoffset, DFoffset, APoffset;
+    HPStr = std::to_string(int(globalVar::user->atrHP));
+    DFStr = std::to_string(globalVar::user->atrDF);
+    APStr = std::to_string(int(globalVar::user->atrAP));
+    HPoffset = std::to_string(int(BASEATRHP));
+    DFoffset = std::to_string(BASEATRDF);
+    APoffset = std::to_string(int(BASEATRAP));
+    
+    DFStr = DFStr.substr(0, DFStr.find('.') + 2);
+    DFoffset = DFoffset.substr(0, DFoffset.find('.') + 2);
+
+    globalVar::screen->printMapMes("你的屬性點數(剩餘點數): " + std::to_string(globalVar::user->atrPoint));
+    globalVar::screen->printMapMes(
+        "血量屬性: " + HPStr + "  (+" + HPoffset + ")");
+    globalVar::screen->printMapMes(
+        "防禦屬性: " + DFStr + "%  (+" + DFoffset + "%)");
+    globalVar::screen->printMapMes(
+        "攻擊屬性: " + APStr + "  (+" + APoffset + ")");
+
+    globalVar::screen->printMapMes("是否加點屬性點數(按下Enter繼續/Esc取消)");
+    char c;
+    while (c = _getch()) {
+        if (c == 27) {
+            globalVar::screen->printMapMes("取消加點!!!");
+            break;
+        } else if (c == 13) {
+            globalVar::screen->printMapMes("請輸入加點<HP, AP, DF> 數量");
+            globalVar::screen->setCursorVisible(true);
+            globalVar::screen->setInfoCursorPos(0, 5);
+            std::string ins;
+            std::getline(std::cin, ins);
+            std::vector<std::string> list;
+            splitstring(ins, list, " ");
+            globalVar::screen->clearMes(0, 5, 10);
+            globalVar::screen->setCursorVisible(false);
+            if (list.size() != 2 || (list[0] != "HP" && list[0] != "DF" && list[0] != "AP")) {
+                globalVar::screen->printMapMes("指令錯誤!!!");
+                break;
+            }
+            int n;
+            try {
+                n = stoi(list[1]);
+            } catch (const std::invalid_argument& e) {
+                globalVar::screen->printMapMes("指令錯誤!!!");
+                break;
+            }
+
+            if (globalVar::user->atrPoint >= n) {
+                globalVar::user->atrPoint -= n;  // 扣除屬性點數
+                globalVar::screen->printMapMes("你的屬性點數剩餘: " + std::to_string(globalVar::user->atrPoint));
+                std::string offset, orgStr, addStr;
+                if (list[0] == "HP") {
+                    offset = std::to_string(int(BASEATRHP * n));
+                    orgStr = std::to_string(int(globalVar::user->atrHP));
+                    addStr = std::to_string(int(globalVar::user->atrHP + BASEATRHP * n));
+
+                    globalVar::user->jb->chCurHP(BASEATRHP * n);  // 不影響baseHP
+
+                    globalVar::screen->printMapMes(
+                        "血量屬性: " + orgStr + " + " + offset + " -> " + addStr);
+                    globalVar::user->atrHP += BASEATRHP * n;
+                } else if (list[0] == "DF") {
+                    offset = std::to_string(BASEATRDF * n);
+                    orgStr = std::to_string(globalVar::user->atrDF);
+                    addStr = std::to_string(globalVar::user->atrDF + BASEATRDF * n);
+                    offset = offset.substr(0, offset.find('.') + 2);
+                    orgStr = orgStr.substr(0, orgStr.find('.') + 2);
+                    addStr = addStr.substr(0, addStr.find('.') + 2);
+
+                    globalVar::user->jb->chCurDF(BASEATRDF * n);  // 不影響baseDF
+                    
+                    globalVar::screen->printMapMes(
+                        "防禦屬性: " + orgStr + "% + " + offset + "% -> " + addStr+"%");
+                    globalVar::user->atrDF += BASEATRDF * n;
+                } else if (list[0] == "AP") {
+                    offset = std::to_string(int(BASEATRAP * n));
+                    orgStr = std::to_string(int(globalVar::user->atrAP));
+                    addStr = std::to_string(int(globalVar::user->atrAP + BASEATRAP * n));
+                    
+                    globalVar::user->jb->chCurAP(BASEATRAP * n);  // 不影響baseAP
+                    
+                    globalVar::screen->printMapMes(
+                        "攻擊屬性: " + orgStr + " + " + offset + " -> " + addStr);
+                    globalVar::user->atrAP += BASEATRAP * n;
+                }
+            } else
+                globalVar::screen->printMapMes("你的屬性點數不足!!!");
+            break;
+        }
+    }
+    globalVar::screen->printMapMes(" ");
+
     return 0;
 }
 
@@ -514,6 +732,10 @@ Instruction::Instruction() {
     funcMap["showSkill"] = reinterpret_cast<void*>(funcShowLevel);
     funcMap["logout"] = reinterpret_cast<void*>(funcLogOut);
     funcMap["store"] = reinterpret_cast<void*>(funcStoreHouse);
+    funcMap["showCRT"] = reinterpret_cast<void*>(funcShowAttribute);
+    funcMap["sell"] = reinterpret_cast<void*>(funcSell);
+    funcMap["equip"] = reinterpret_cast<void*>(funcEquipUp);
+    funcMap["attribute"] = reinterpret_cast<void*>(funcAttributeUp);
 }
 
 int Instruction::insertCommand() {

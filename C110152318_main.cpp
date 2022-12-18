@@ -76,7 +76,7 @@ void initializeGame() {
 
 void genMonster() {
     if (!globalVar::genMons) {
-        if (globalVar::killNum > 5 || globalVar::monsterList.size() == 0) {
+        if (globalVar::killNum >= 5 || globalVar::monsterList.size() == 0) {
             globalVar::screen->printMapMes("生成怪物:");
             genAnyNumMons(rand()%5+1);
             globalVar::killNum = 0;
@@ -111,7 +111,6 @@ void genMonster() {
         globalVar::screen->printMapMes(" ");
     } else if (globalVar::genMons) {  // 刷新地圖時候
         globalVar::screen->printMapMes("怪物資訊:");
-        // globalVar::monsterList.resize(MONSIZE, nullptr);
         int n = rand()%MONSIZE+3;
         globalVar::screen->printMapMes("數量: "+to_string(n));
         genAnyNumMons(n);

@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:\\SoftWare\\cppLibrary\\nlhmannJson\\single_include"
+                // "D:\\SoftWare\\cppLibrary\\nlhmannJson\\single_include"
+                "D:\\Programming\\final\\final-assignment\\suite"
                 // "D:\\SoftWare\\cppLibrary\\boost_1_80_0"
             ],
             "defines": [

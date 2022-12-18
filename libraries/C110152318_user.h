@@ -17,6 +17,9 @@
 
 #define MAXLEVEL 100
 #define MAXSKLEVEL 6
+#define BASEATRHP 10
+#define BASEATRDF 0.1
+#define BASEATRAP 5
 
 static std::mutex mut;
 
@@ -39,6 +42,12 @@ class User {
     JobComb* jb = nullptr;
     int totleKill = 0;
     int skillPoint = 0;
+    int skillUpPoint = 0;
+
+    double atrHP = 0;
+    double atrDF = 0;
+    double atrAP = 0;
+    int atrPoint = 0;
 
    public:
     User();
@@ -63,17 +72,20 @@ class User {
     bool isLive() const { return live; }
     void setLive(bool s) { live = s; }
     int useSkill();
-    int incSklv() { return (skLevel += skLevel+1>MAXSKLEVEL ? 0 : 1); }
+    int incSklv() { return (skLevel += skLevel + 1 > MAXSKLEVEL ? 0 : 1); }
     int getSklevel() const { return skLevel; }
     int getLevel() const { return level; }
     double getCritiCalRate() const { return CRT_Rate; }
-    void incCritiCalRate(int rate) { CRT_Rate += rate; }
-    void decCritiCalRate(int rate) { CRT_Rate -= rate; }
+    void incCritiCalRate(double rate) { CRT_Rate += rate; }
+    void decCritiCalRate(double rate) { CRT_Rate -= rate; }
     double getCritiCalDmg() { return CRT_dmg; }
     void incCritiCalDmg(double dmg) { CRT_dmg += dmg; }
-    void decCritiCalDmg(double dmg) { CRT_dmg -= dmg;}
-    void incSkillPoint() { skillPoint += (((skillPoint+1) <= (level/5)) ? 1 : 0); }
-    bool isSkillFull() const { return skillPoint >= level/5; }
+    void decCritiCalDmg(double dmg) { CRT_dmg -= dmg; }
+    void incSkillPoint() { skillPoint += (((skillPoint + 1) <= level) ? 1 : 0); }
+    void minSkillPoint() { skillPoint -= skLevel*5; }
+    bool isSkillFull() const { return skillPoint >= level; }
+    std::string getSkillName() const;
+    std::string getSkillEffect() const;
 };
 
 User::User() {
@@ -92,24 +104,56 @@ User::User() {
     // 爆擊率、爆傷
     if (number == WARRIOR) {
         CRT_Rate = 0.2;
-        CRT_dmg = 0.75*(level/5.0);
+        CRT_dmg = 0.75 * (level / 5.0);
     } else if (number == MAGIC) {
         CRT_Rate = 0.15;
-        CRT_dmg = 833*(level/5.0);
+        CRT_dmg = 833 * (level / 5.0);
     } else if (number == ASSASSIN) {
         CRT_Rate = 0.3;
-        CRT_dmg = 1.45*(level/5.0);
+        CRT_dmg = 1.45 * (level / 5.0);
     } else if (number == TANK) {
         CRT_Rate = 0.1;
-        CRT_dmg = 0.54*(level/5.0);
+        CRT_dmg = 0.54 * (level / 5.0);
     }
     saveData();
 }
 
 void User::login() {
-    globalVar::screen->clearMap();
+    // globalVar::screen->clearMap();
     globalVar::screen->setCursorVisible(true);
 
+    std::cout << "請選擇登入或刪除帳號(0/1): ";
+    int inpt;
+    std::string inidx;
+    getline(std::cin, inidx);
+    try {
+        inpt = std::stoi(inidx);
+    } catch (const std::invalid_argument& e) {
+        system("cls");
+        std::cout << "輸入錯誤!!!\n";
+        return login();
+    }
+    if (inpt) {
+        for (const auto& j : globalVar::jin["account"].items())
+            std::cout << j.key() << std::endl;
+        std::cout << "輸入要刪除的帳號: " << std::endl;
+        getline(std::cin, inidx);
+
+        if (globalVar::jin["account"].count(inidx) > 0) {
+            system("cls"); 
+            std::cout << "刪除帳號: " + inidx + "                  " << std::endl;
+            globalVar::jin["account"].erase(inidx);
+            globalVar::file_out.open(path);
+            globalVar::file_out << globalVar::jin.dump(4) << std::endl;
+            globalVar::file_out.close();
+        } else {
+            system("cls");
+            std::cout << "沒有這個帳號!!!                  " << std::endl;
+        }
+        return login();
+    }
+
+    system("cls");
     std::cout << "請輸入帳號: ";
     (std::cin >> ID).get();
 
@@ -117,7 +161,6 @@ void User::login() {
     if (globalVar::jin["account"].count(ID) > 0) {
         int t = 3;
         totleKill = globalVar::jin["account"][ID]["totleKill"];
-        skillPoint = globalVar::jin["account"][ID]["skillPoint"];
         while (t) {
             globalVar::screen->setStdCursorPos(0, 1);
             std::cout << std::string(globalVar::screen->getConsoleWidth(), ' ');
@@ -159,6 +202,10 @@ void User::login() {
         }
         changeJob();
         coin = globalVar::jin["account"][ID]["money"];
+    } else if (globalVar::jin["account"].size() >= 3) {
+        system("cls");
+        std::cout << "帳號數量已達限制!!!                " << std::endl;
+        return login();
     } else {
         std::cout << "請設定密碼(新帳號): ";
         (std::cin >> passwd).get();
@@ -180,8 +227,8 @@ void User::login() {
     if (ID == "10") {
         if (level < 100)
             setLevel(100);
-        if (coin <= 1000000)
-            changeCoin(1000000);
+        if (coin <= 10000000)
+            changeCoin(10000000);
     }
     // 超級帳號
 
@@ -242,14 +289,18 @@ void User::saveData() {
     userID["passwd"] = passwd;
     userID["money"] = coin;
     userID["totleKill"] = totleKill;
-    userID["skillPoint"] = skillPoint;
     userID["job"][number] = nlohmann::json{
         {"skillPoint", skillPoint},
+        {"skillUpPoint", skillUpPoint},
         {"live", live},
         {"EXP", EXP},
         {"level", level},
         {"needEXP", needEXP},
         {"skillLevel", skLevel},
+        {"atrPoint", atrPoint},
+        {"atrHP", atrHP},
+        {"atrDF", atrDF},
+        {"atrAP", atrAP},
         {"status", nlohmann::json{
                        {"HP", jb->getHP()},
                        {"DF", jb->getDF()},
@@ -279,6 +330,11 @@ void User::changeJob() {
         needEXP = jobList[number]["needEXP"];
         jb->setCurHP(jobList[number]["status"]["curHP"]);
         skillPoint = jobList[number]["skillPoint"];
+        skillUpPoint = jobList[number]["skillUpPoint"];
+        atrPoint = jobList[number]["atrPoint"];
+        atrAP = jobList[number]["atrAP"];
+        atrDF = jobList[number]["atrDF"];
+        atrHP = jobList[number]["atrHP"];
     } else {
         EXP = 0;
         level = 1;
@@ -297,11 +353,30 @@ void User::changeJob() {
 void User::expUp(double l) {
     EXP += l;
     while (level < MAXLEVEL && (fabs(needEXP - EXP) <= 0.0001 || EXP >= needEXP)) {
-        skillPoint = (++level)/5;  // 技能點數
+        ++skillUpPoint;  // 加上技能升級點數
+        ++atrPoint;  // 加上屬性點數
+        skillPoint = (++level);  // 加上技能點數上限(可以釋放技能)
         EXP -= needEXP;
         jb->setLevelStatus();
         if (level < MAXLEVEL)
             needEXP += (needEXP * 0.1 + 3000) * 0.2 + 10;
+        // 設定爆擊傷害和機率
+        if (number == WARRIOR) {
+            CRT_Rate = 0.2;
+            CRT_dmg = 0.75 * (level / 5.0);
+        } else if (number == MAGIC) {
+            CRT_Rate = 0.15;
+            CRT_dmg = 833 * (level / 5.0);
+        } else if (number == ASSASSIN) {
+            CRT_Rate = 0.3;
+            CRT_dmg = 1.45 * (level / 5.0);
+        } else if (number == TANK) {
+            CRT_Rate = 0.1;
+            CRT_dmg = 0.54 * (level / 5.0);
+        }
+        if (globalVar::set) {  // 套裝模式
+            CRT_Rate += 0.2;
+        }
     }  // 0.02^(n-1)*(needEXP+(610/0.02))-(610/0.02)
     if (level >= MAXLEVEL)
         EXP = needEXP;
@@ -360,36 +435,64 @@ void User::showEXP(SHORT x, SHORT y) const {
     }
     globalVar::screen->setColor();
     globalVar::screen->setMes(
-        "擊殺: " + std::to_string(totleKill) + " 技能點: " + std::to_string(skillPoint)+"   ", x, y+2);
+        "擊殺: " + std::to_string(totleKill) + " 技能點: " + std::to_string(skillPoint) + "   ", x, y + 2);
 }
 
 int User::useSkill() {
-    if (skillPoint <= 0) return -1;
-    --skillPoint;
+    if (skillPoint - skLevel < 0) return -1;
+    minSkillPoint();
+    globalVar::screen->printMapMes("消耗" + std::to_string(skLevel*5) + "點技能點");
     if (number == WARRIOR) {
         globalVar::screen->printMapMes(
-            "【戰士】發動了技能【四連斬】,連續攻擊 "+ std::to_string(4*skLevel) + 
-            " 次, LV: "+std::to_string(skLevel));
+            "【戰士】發動了技能【" + std::to_string(4 * skLevel) + "連斬】,連續攻擊 " +
+            std::to_string(4 * skLevel) + " 次, LV: " + std::to_string(skLevel));
         return 0;
     } else if (number == MAGIC) {
         globalVar::screen->printMapMes(
-            "【法師】發動了技能【祝福】,恢復了 "+ std::to_string(10*skLevel) + 
-            "% 生命, LV: "+std::to_string(skLevel));
-        jb->healHP(jb->getHP()*(10.0*skLevel/100.0));
+            "【法師】發動了技能【祝福】,恢復了 " + std::to_string(10 * skLevel) +
+            "% 生命, LV: " + std::to_string(skLevel));
+        jb->healHP(jb->getHP() * (10.0 * skLevel / 100.0));
         return 1;
     } else if (number == ASSASSIN) {
         globalVar::screen->printMapMes(
-            "【刺客】發動了技能【吸血】,吸收攻擊 "+ std::to_string(10*skLevel) +
-            "% 持續5回合, LV: "+std::to_string(skLevel));
+            "【刺客】發動了技能【吸血】,吸收攻擊 " + std::to_string(10 * skLevel) +
+            "% 持續" + std::to_string(5 * skLevel) + "回合, LV: " + std::to_string(skLevel));
         return 2;
     } else if (number == TANK) {
         globalVar::screen->printMapMes(
-            "【坦克】發動了技能【榮譽護盾】,防禦增加 "+ std::to_string(10*skLevel) +
-            " 10秒, LV: "+std::to_string(skLevel));
+            "【坦克】發動了技能【榮譽護盾】,防禦增加 " + std::to_string(10 * skLevel) +
+            "% 10秒, LV: " + std::to_string(skLevel));
         jb->addDF(10, 10000);
         return 3;
     }
     return -2;
+}
+
+std::string User::getSkillName() const {
+    if (number == WARRIOR) {
+        return "【" + std::to_string(4 * skLevel) + "連斬】";
+    } else if (number == MAGIC) {
+        return "【祝福】";
+    } else if (number == ASSASSIN) {
+        return "【吸血】";
+    } else if (number == TANK) {
+        return "【榮譽護盾】";
+    }
+    return "";
+}
+
+std::string User::getSkillEffect() const {
+    if (number == WARRIOR) {
+        return "連續攻擊" + std::to_string(4 * skLevel) + "次";
+    } else if (number == MAGIC) {
+        return "恢復血量" + std::to_string(10 * skLevel) +
+               "% -> " + std::to_string(jb->getHP() * (10.0 * skLevel / 100.0)) + "點生命";
+    } else if (number == ASSASSIN) {
+        return "吸取攻擊的" + std::to_string(10 * skLevel) + "% 持續" + std::to_string(5 * skLevel) + "回合";
+    } else if (number == TANK) {
+        return "防禦增加" + std::to_string(10 * skLevel) + "% 10秒";
+    }
+    return "";
 }
 
 #endif

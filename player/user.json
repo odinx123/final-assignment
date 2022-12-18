@@ -5,46 +5,22 @@
             "job": {
                 "1": {
                     "EXP": 181951.1275162234,
+                    "atrAP": 495.0,
+                    "atrDF": 0.0,
+                    "atrHP": 0.0,
+                    "atrPoint": 0,
                     "bag": {
-                        "13": {
-                            "1": 0,
-                            "ware": true
+                        "0": {
+                            "1": {
+                                "number": 1,
+                                "ware": false
+                            }
                         },
                         "14": {
-                            "1": 0,
-                            "ware": true
-                        },
-                        "15": {
-                            "1": 0,
-                            "ware": true
-                        },
-                        "9": {
-                            "1": 1,
-                            "ware": false
-                        }
-                    },
-                    "level": 100,
-                    "live": true,
-                    "needEXP": 181951.1275162234,
-                    "skillLevel": 1,
-                    "skillPoint": 20,
-                    "status": {
-                        "AP": 3113.670826554217,
-                        "DF": 69.09081310054371,
-                        "HP": 19947.699999999997,
-                        "curHP": 8586.699999999997
-                    }
-                },
-                "3": {
-                    "EXP": 181951.1275162234,
-                    "bag": {
-                        "11": {
-                            "1": 1,
-                            "ware": false
-                        },
-                        "8": {
-                            "1": 0,
-                            "ware": true
+                            "1": {
+                                "number": 0,
+                                "ware": true
+                            }
                         }
                     },
                     "level": 100,
@@ -52,51 +28,58 @@
                     "needEXP": 181951.1275162234,
                     "skillLevel": 1,
                     "skillPoint": 100,
+                    "skillUpPoint": 99,
                     "status": {
-                        "AP": 2681.7895103757805,
-                        "DF": 41.97508794942643,
-                        "HP": 11864.86,
-                        "curHP": 11800.86
+                        "AP": 2108.670826554217,
+                        "DF": 60.09081310054371,
+                        "HP": 18447.699999999997,
+                        "curHP": 17947.699999999997
                     }
-                }
-            },
-            "money": 1986713.0,
-            "passwd": "10",
-            "skillPoint": 20,
-            "store": {
-                "5": {
-                    "1": 1
-                }
-            },
-            "totleKill": 3
-        },
-        "odinx123": {
-            "curCity": "modernCity",
-            "job": {
+                },
                 "3": {
-                    "EXP": 149.0,
+                    "EXP": 181951.1275162234,
+                    "atrAP": 80.0,
+                    "atrDF": 5.4,
+                    "atrHP": 290.0,
+                    "atrPoint": 0,
                     "bag": null,
-                    "level": 2,
+                    "level": 100,
                     "live": true,
-                    "needEXP": 620.2,
+                    "needEXP": 181951.1275162234,
                     "skillLevel": 1,
-                    "skillPoint": 1,
+                    "skillPoint": 100,
+                    "skillUpPoint": 99,
                     "status": {
-                        "AP": 38.325,
-                        "DF": 12.256,
-                        "HP": 36.260000000000005,
-                        "curHP": 27.260000000000005
+                        "AP": 2761.7895103757805,
+                        "DF": 43.37508794942643,
+                        "HP": 12054.86,
+                        "curHP": 11764.86
+                    }
+                },
+                "4": {
+                    "EXP": 181951.1275162234,
+                    "atrAP": 0.0,
+                    "atrDF": 9.9,
+                    "atrHP": 0.0,
+                    "atrPoint": 0,
+                    "bag": null,
+                    "level": 100,
+                    "live": true,
+                    "needEXP": 181951.1275162234,
+                    "skillLevel": 1,
+                    "skillPoint": 100,
+                    "skillUpPoint": 99,
+                    "status": {
+                        "AP": 1381.0111862858441,
+                        "DF": 75.9881459381323,
+                        "HP": 22224.320000000007,
+                        "curHP": 22224.320000000007
                     }
                 }
             },
-            "money": 126.0,
-            "passwd": "9879",
-            "skillPoint": 1,
-            "store": {
-                "3": {
-                    "1": 1
-                }
-            },
+            "money": 9963612.0,
+            "passwd": "10",
+            "store": null,
             "totleKill": 3
         }
     }

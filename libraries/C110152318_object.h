@@ -103,23 +103,23 @@ int Object::eat() {
 void Object::use(int lv) {  // just for use item not eat.
     globalVar::user->jb->chCurAP(addAP * lv);
     globalVar::user->jb->chCurHP(addHP * lv);
-    globalVar::user->jb->chCurDF(addDF * lv);
+    globalVar::user->jb->chCurDF(addDF * (lv*0.1+1));
     globalVar::screen->printMapMes("你裝備了<" + name + ">");
     globalVar::screen->printMapMes(
         "HP:" + std::to_string(addHP * lv) + " " +
         "AP:" + std::to_string(addAP * lv) + " " +
-        "DF:" + std::to_string(addDF * lv));
+        "DF:" + std::to_string(addDF * (lv*0.1+1)));
 }
 
 void Object::deuse(int lv) {  // just for use item not eat.
     globalVar::user->jb->chCurAP(-addAP * lv);
     globalVar::user->jb->chCurHP(-addHP * lv);
-    globalVar::user->jb->chCurDF(-addDF * lv);
+    globalVar::user->jb->chCurDF(-addDF * (lv*0.1+1));
     globalVar::screen->printMapMes("你脫下了<" + name + ">");
     globalVar::screen->printMapMes(
         "HP:" + std::to_string(-addHP * lv) + " " +
         "AP:" + std::to_string(-addAP * lv) + " " +
-        "DF:" + std::to_string(-addDF * lv));
+        "DF:" + std::to_string(-addDF * (lv*0.1+1)));
 }
 
 #endif
