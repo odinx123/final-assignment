@@ -3,6 +3,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <cmath>
+#include <functional>
 
 #include "libraries/C110152318_MyFunction.h"
 using namespace std;
@@ -11,9 +12,10 @@ void initializeGame();
 void genMonster();
 BOOL CtrlHandler(DWORD fdwCtrlType);
 
+extern std::thread t1;
+
 int main() {
     initializeGame();
-    // User user;
 
     SetConsoleCtrlHandler(CtrlHandler, true);
     while (globalVar::gameState) {
@@ -41,6 +43,7 @@ int main() {
                     break;
             }
         }
+        globalVar::screen->showSnow(30);
 
         globalVar::screen->setCursorVisible(false);
         globalVar::screen->clearAllMap();
@@ -52,6 +55,7 @@ int main() {
     }
 
     globalVar::bg->saveBagItem();
+    t1.join();
     system("cls");
     system("pause");
     return 0;
@@ -70,6 +74,10 @@ void initializeGame() {
     srand(time(nullptr));
 
     globalVar::user->showInfo();
+    globalVar::screen->initSnow(30);
+    
+    // auto showSnow = Map::showSnow;
+    // t1 = std::thread(showSnow, globalVar::screen, 30);
     // for (int i = 2; i <= 1000; ++i)
     //     globalVar::user->expUp(100);
 }

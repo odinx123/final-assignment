@@ -60,6 +60,7 @@ class Bag {
     int getItemNum(int idx, int lv) { return bagList[{idx, lv}]; }
     bool isItemExist(int idx, int lv) const { return bagList.count({idx, lv}) > 0; }
     void levelUP(int idx, int lv, int cost);
+    bool isItemWare(int idx, int lv);
 };
 
 Bag::Bag() {
@@ -278,7 +279,7 @@ void Bag::loadBagItem() {
             int num = oj.value()["number"];
             bool ware = oj.value()["ware"];
 
-            bagList[{number, lv}] = number;  // 先放進背包
+            bagList[{number, lv}] = num;  // 先放進背包
             if (ware) {
                 auto kkey = std::make_pair(number, lv);
                 int type = objList[number]->getType();
@@ -488,6 +489,11 @@ void Bag::levelUP(int idx, int lv, int cost) {
         globalVar::user->changeCoin(-cost);
     } else
         globalVar::screen->printMapMes("等級已達上限!!!");
+}
+
+bool Bag::isItemWare(int idx, int lv) {
+    auto kkey = std::make_pair(idx, lv);
+    return (kkey == weapon || kkey == chestplate || kkey == pants);
 }
 
 #endif

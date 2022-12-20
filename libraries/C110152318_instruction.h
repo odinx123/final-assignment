@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <thread>
 
 #include "C110152318_bag.h"
 #include "C110152318_fight.h"
@@ -23,8 +24,12 @@ class Instruction {
     void printConmand() const;
 };
 
+bool g_bStop = false;
+std::thread t1;
+
 inline void printMes(const std::string& mes, SHORT x, SHORT y, int color);
 void splitstring(const std::string& s, std::vector<std::string>& v, const std::string& c);
+void WINAPI PlayAudio();
 
 int funcExit(const std::vector<std::string>& tokens) {
     Beep(750, 100);
@@ -504,6 +509,10 @@ int funcSell(const std::vector<std::string>& tokens) {
         printMes("Command error!!!", 0, 0, 4);
         return 1;
     }
+    if (globalVar::screen->getCurCity() != "market") {
+        globalVar::screen->printMapMes("你只能在超級商城販賣物品!!!");
+        return 1;
+    }
     globalVar::screen->printMapMes("請選擇要販賣的物品!!!");
     globalVar::bg->showBagList();
 
@@ -533,12 +542,17 @@ int funcSell(const std::vector<std::string>& tokens) {
         globalVar::screen->printMapMes(" ");
         return 1;
     }
+    if (globalVar::bg->isItemWare(index, lv)) {
+        globalVar::screen->printMapMes("你必須將裝備脫下才能販賣");
+        globalVar::screen->printMapMes(" ");
+        return 1;
+    }
 
-    int s = globalVar::bg->eraseBagItemFromData(index, lv);
-    if (!s) {
+    if (globalVar::bg->isItemExist(index, lv)) {
         globalVar::screen->printMapMes("販賣裝備成功獲得" +
                                        std::to_string(globalVar::bg->getItemNum(index, lv) * 100 * lv) + "元!!!");
         globalVar::user->changeCoin(globalVar::bg->getItemNum(index, lv) * 100 * lv);
+        globalVar::bg->eraseBagItemFromData(index, lv);
     } else {
         globalVar::screen->printMapMes("你背包沒有這件裝備!!!");
         globalVar::screen->printMapMes("你因為詐騙將賠償1000元，如果錢不夠將負債!!!");
@@ -630,7 +644,7 @@ int funcAttributeUp(const std::vector<std::string>& tokens) {
     HPoffset = std::to_string(int(BASEATRHP));
     DFoffset = std::to_string(BASEATRDF);
     APoffset = std::to_string(int(BASEATRAP));
-    
+
     DFStr = DFStr.substr(0, DFStr.find('.') + 2);
     DFoffset = DFoffset.substr(0, DFoffset.find('.') + 2);
 
@@ -693,17 +707,17 @@ int funcAttributeUp(const std::vector<std::string>& tokens) {
                     addStr = addStr.substr(0, addStr.find('.') + 2);
 
                     globalVar::user->jb->chCurDF(BASEATRDF * n);  // 不影響baseDF
-                    
+
                     globalVar::screen->printMapMes(
-                        "防禦屬性: " + orgStr + "% + " + offset + "% -> " + addStr+"%");
+                        "防禦屬性: " + orgStr + "% + " + offset + "% -> " + addStr + "%");
                     globalVar::user->atrDF += BASEATRDF * n;
                 } else if (list[0] == "AP") {
                     offset = std::to_string(int(BASEATRAP * n));
                     orgStr = std::to_string(int(globalVar::user->atrAP));
                     addStr = std::to_string(int(globalVar::user->atrAP + BASEATRAP * n));
-                    
+
                     globalVar::user->jb->chCurAP(BASEATRAP * n);  // 不影響baseAP
-                    
+
                     globalVar::screen->printMapMes(
                         "攻擊屬性: " + orgStr + " + " + offset + " -> " + addStr);
                     globalVar::user->atrAP += BASEATRAP * n;
@@ -714,6 +728,27 @@ int funcAttributeUp(const std::vector<std::string>& tokens) {
         }
     }
     globalVar::screen->printMapMes(" ");
+
+    return 0;
+}
+
+int funcMusic(const std::vector<std::string>& tokens) {
+    if (tokens.size() != 2 || (tokens[1] != "play" && tokens[1] != "stop")) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return 1;
+    }
+
+    if (tokens[1] == "play") {
+        g_bStop = false;
+        // t1 = std::thread(PlayAudio);
+        PlayAudio();
+        // PlayAudio();
+    } else {  // stop all music.
+        g_bStop = true;
+        mciSendString(TEXT("close music1.mp3"), nullptr, 0, nullptr);
+        mciSendString(TEXT("close music2.mp3"), nullptr, 0, nullptr);
+    }
 
     return 0;
 }
@@ -736,6 +771,7 @@ Instruction::Instruction() {
     funcMap["sell"] = reinterpret_cast<void*>(funcSell);
     funcMap["equip"] = reinterpret_cast<void*>(funcEquipUp);
     funcMap["attribute"] = reinterpret_cast<void*>(funcAttributeUp);
+    funcMap["music"] = reinterpret_cast<void*>(funcMusic);
 }
 
 int Instruction::insertCommand() {
@@ -795,6 +831,27 @@ void printMes(const std::string& mes, SHORT x, SHORT y, int color) {
     globalVar::screen->setColor(color);
     globalVar::screen->setMes(mes, x, y);
     globalVar::screen->setColor();
+}
+
+void WINAPI PlayAudio() {
+    globalVar::screen->setCursorVisible(true);
+    globalVar::screen->printMapMes("請選擇音樂!!!");
+    globalVar::screen->printMapMes("聖誕音樂: 1");
+    globalVar::screen->printMapMes("背景音樂: 2");
+    globalVar::screen->printMapMes(" ");
+    globalVar::screen->setInfoCursorPos(0, 5);
+    std::string ins;
+    std::getline(std::cin, ins);
+    globalVar::screen->clearMes(0, 5, 27);
+    if (ins.size() != 1 || (ins[0] != '1' && ins[0] != '2')) {
+        globalVar::screen->clearMes(0, 0, 30);
+        printMes("Command error!!!", 0, 0, 4);
+        return;
+    }
+    if (ins == "1")
+        mciSendString(TEXT("play music1.mp3 repeat"), nullptr, 0, nullptr);
+    else
+        mciSendString(TEXT("play music2.mp3 repeat"), nullptr, 0, nullptr);
 }
 
 #endif

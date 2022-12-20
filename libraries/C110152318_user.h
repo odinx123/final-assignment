@@ -408,13 +408,13 @@ void User::showCoin(SHORT x, SHORT y) const {
 void User::showEXP(SHORT x, SHORT y) const {
     globalVar::screen->setColor(10);
     if (number == WARRIOR)
-        globalVar::screen->setMes("戰士 Lv" + std::to_string(level), x, y);
+        globalVar::screen->setMes(ID+" 【戰士】 Lv" + std::to_string(level), x, y);
     else if (number == MAGIC)
-        globalVar::screen->setMes("法師 Lv" + std::to_string(level), x, y);
+        globalVar::screen->setMes(ID+" 【法師】 Lv" + std::to_string(level), x, y);
     else if (number == ASSASSIN)
-        globalVar::screen->setMes("刺客 Lv" + std::to_string(level), x, y);
+        globalVar::screen->setMes(ID+" 【刺客】 Lv" + std::to_string(level), x, y);
     else if (number == TANK)
-        globalVar::screen->setMes("坦克 Lv" + std::to_string(level), x, y);
+        globalVar::screen->setMes(ID+" 【坦克】 Lv" + std::to_string(level), x, y);
 
     globalVar::screen->setColor(14);
     globalVar::screen->setMes("經驗: ", x, y + 3);

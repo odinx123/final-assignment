@@ -1,22 +1,48 @@
 {
     "account": {
         "10": {
-            "curCity": "market",
+            "curCity": "lobby",
             "job": {
                 "1": {
                     "EXP": 181951.1275162234,
-                    "atrAP": 495.0,
+                    "atrAP": 0.0,
                     "atrDF": 0.0,
                     "atrHP": 0.0,
+                    "atrPoint": 99,
+                    "bag": null,
+                    "level": 100,
+                    "live": true,
+                    "needEXP": 181951.1275162234,
+                    "skillLevel": 1,
+                    "skillPoint": 100,
+                    "skillUpPoint": 99,
+                    "status": {
+                        "AP": 1613.670826554217,
+                        "DF": 49.09081310054371,
+                        "HP": 17947.699999999997,
+                        "curHP": 17947.699999999997
+                    }
+                },
+                "3": {
+                    "EXP": 181951.1275162234,
+                    "atrAP": 350.0,
+                    "atrDF": 0.0,
+                    "atrHP": 290.0,
                     "atrPoint": 0,
                     "bag": {
-                        "0": {
+                        "13": {
                             "1": {
-                                "number": 1,
-                                "ware": false
+                                "number": 0,
+                                "ware": true
                             }
                         },
                         "14": {
+                            "1": {
+                                "number": 0,
+                                "ware": true
+                            }
+                        },
+                        "15": {
                             "1": {
                                 "number": 0,
                                 "ware": true
@@ -26,61 +52,83 @@
                     "level": 100,
                     "live": true,
                     "needEXP": 181951.1275162234,
-                    "skillLevel": 1,
+                    "skillLevel": 6,
                     "skillPoint": 100,
-                    "skillUpPoint": 99,
+                    "skillUpPoint": 39,
                     "status": {
-                        "AP": 2108.670826554217,
-                        "DF": 60.09081310054371,
-                        "HP": 18447.699999999997,
-                        "curHP": 17947.699999999997
-                    }
-                },
-                "3": {
-                    "EXP": 181951.1275162234,
-                    "atrAP": 80.0,
-                    "atrDF": 5.4,
-                    "atrHP": 290.0,
-                    "atrPoint": 0,
-                    "bag": null,
-                    "level": 100,
-                    "live": true,
-                    "needEXP": 181951.1275162234,
-                    "skillLevel": 1,
-                    "skillPoint": 100,
-                    "skillUpPoint": 99,
-                    "status": {
-                        "AP": 2761.7895103757805,
-                        "DF": 43.37508794942643,
-                        "HP": 12054.86,
-                        "curHP": 11764.86
-                    }
-                },
-                "4": {
-                    "EXP": 181951.1275162234,
-                    "atrAP": 0.0,
-                    "atrDF": 9.9,
-                    "atrHP": 0.0,
-                    "atrPoint": 0,
-                    "bag": null,
-                    "level": 100,
-                    "live": true,
-                    "needEXP": 181951.1275162234,
-                    "skillLevel": 1,
-                    "skillPoint": 100,
-                    "skillUpPoint": 99,
-                    "status": {
-                        "AP": 1381.0111862858441,
-                        "DF": 75.9881459381323,
-                        "HP": 22224.320000000007,
-                        "curHP": 22224.320000000007
+                        "AP": 4531.78951037578,
+                        "DF": 59.47508794942643,
+                        "HP": 14054.86,
+                        "curHP": 14054.86
                     }
                 }
             },
-            "money": 9963612.0,
+            "money": 19960030.0,
             "passwd": "10",
+            "store": {
+                "6": {
+                    "1": 1
+                }
+            },
+            "totleKill": 1
+        },
+        "ksadjf": {
+            "curCity": "lobby",
+            "job": {
+                "1": {
+                    "EXP": 0.0,
+                    "atrAP": 0.0,
+                    "atrDF": 0.0,
+                    "atrHP": 0.0,
+                    "atrPoint": 0,
+                    "bag": null,
+                    "level": 1,
+                    "live": true,
+                    "needEXP": 10.0,
+                    "skillLevel": 1,
+                    "skillPoint": 1,
+                    "skillUpPoint": 0,
+                    "status": {
+                        "AP": 15.0,
+                        "DF": 20.0,
+                        "HP": 20.0,
+                        "curHP": 20.0
+                    }
+                }
+            },
+            "money": 100.0,
+            "passwd": "aksdjf",
             "store": null,
-            "totleKill": 3
+            "totleKill": 0
+        },
+        "odinx123": {
+            "curCity": "lobby",
+            "job": {
+                "1": {
+                    "EXP": 0.0,
+                    "atrAP": 0.0,
+                    "atrDF": 0.0,
+                    "atrHP": 0.0,
+                    "atrPoint": 0,
+                    "bag": null,
+                    "level": 1,
+                    "live": true,
+                    "needEXP": 10.0,
+                    "skillLevel": 1,
+                    "skillPoint": 1,
+                    "skillUpPoint": 0,
+                    "status": {
+                        "AP": 15.0,
+                        "DF": 20.0,
+                        "HP": 20.0,
+                        "curHP": 20.0
+                    }
+                }
+            },
+            "money": 100.0,
+            "passwd": "9879",
+            "store": null,
+            "totleKill": 0
         }
     }
 }

@@ -47,6 +47,7 @@ class Map {
     CONSOLE_SCREEN_BUFFER_INFO size_S;
     SHORT preHeight;
     SHORT preWidth;
+    std::vector<COORD> snow;
 
    public:
     Map(SHORT Height = 13, const std::string curm = "map01");
@@ -80,6 +81,8 @@ class Map {
     inline COORD getCurMesPos() const;
     inline void displayMap();
     inline void clearAllMap();
+    void showSnow(int num);
+    void initSnow(int num);
 
    private:
     void testAllCity(uodMap_sb& hash_, const std::string& name, SHORT w, SHORT h);
@@ -90,13 +93,24 @@ Map::Map(SHORT Height, const std::string curm) {
     system("cls");
     height = Height;
     stdBuf = GetStdHandle(STD_OUTPUT_HANDLE);
-    // buffer.resize(getConsoleHeight(), std::wstring());
-    buffer.resize(getConsoleHeight()+20, std::string());
+
+    COORD NewSize = GetLargestConsoleWindowSize(stdBuf);  // 或得控制台最大座標
+    NewSize.X -= 1;
+    NewSize.Y -= 1;
+    SMALL_RECT DisplayArea = {0, 0, 0, 0};
+    DisplayArea.Right = NewSize.X;
+    DisplayArea.Bottom = NewSize.Y;
+    SetConsoleWindowInfo(stdBuf, TRUE, &DisplayArea);  // 設定控制台大小
+    // 設定視窗位置(到左上)
+    ShowWindow(GetConsoleWindow(), SW_MAXIMIZE);
+
+    buffer.resize(getConsoleHeight() + 20, std::string());
 
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
     setCursorVisible(false);
-    SetWindowPos(GetConsoleWindow(), HWND_TOPMOST, 300, 35, 0, 0, SWP_NOSIZE);
+    // 設定位置
+    // SetWindowPos(GetConsoleWindow(), HWND_TOPMOST, 300, 35, 0, 0, SWP_NOSIZE);
 
     get_path(path);
     path += "\\map";
@@ -143,12 +157,12 @@ void Map::loadMap(const std::string& name) {
 
     displayMap();
 
-    setStdCursorPos(0, height+1);
+    setStdCursorPos(0, height + 1);
     int i;
     for (i = 1; i < height && !globalVar::file_in.eof(); ++i) {
         getline(globalVar::file_in, temp);
-        buffer[i-1] = temp + "\n";
-        std::cout << buffer[i-1];
+        buffer[i - 1] = temp + "\n";
+        std::cout << buffer[i - 1];
     }
     mapPos = getCursorPos();
     ++mapPos.Y;
@@ -179,7 +193,7 @@ void Map::clearMap() {
     SHORT h = getConsoleHeight();
     setStdCursorPos(0, height + 1);
     SHORT width = getConsoleWidth();
-    for (SHORT i = 0; i < h-height; ++i)
+    for (SHORT i = 0; i < h - height; ++i)
         std::cout << std::string(width, ' ');
     setStdCursorPos(0, 0);
 }
@@ -223,7 +237,7 @@ void Map::showMap(uodMap_sb& hash_, std::string name, SHORT x, SHORT y) {
     std::cout << mapDict[name];
     setColor();
 
-    auto wordWide = isalpha(mapDict[name][0]) ? name.size() : mapDict[name].size()/1.5;
+    auto wordWide = isalpha(mapDict[name][0]) ? name.size() : mapDict[name].size() / 1.5;
     if (info[name]["west"] != "null" && !hash_[info[name]["west"]]) {
         setStdCursorPos(x - 2, y);
         std::cout << "--";
@@ -232,11 +246,11 @@ void Map::showMap(uodMap_sb& hash_, std::string name, SHORT x, SHORT y) {
         std::cout << "--";
     }
     if (info[name]["north"] != "null" && !hash_[info[name]["north"]]) {
-        setStdCursorPos(x + wordWide / 2-1, y - 1);
+        setStdCursorPos(x + wordWide / 2 - 1, y - 1);
         std::cout << "|";
     }
     if (info[name]["south"] != "null" && !hash_[info[name]["south"]]) {
-        setStdCursorPos(x + wordWide / 2-1, y + 1);
+        setStdCursorPos(x + wordWide / 2 - 1, y + 1);
         std::cout << "|";
     }
     showMap(hash_, info[name]["west"], x - wordWide - 2, y);
@@ -313,9 +327,9 @@ void Map::setInfoCursorPos(SHORT x, SHORT y) {
 
 void Map::showCityNumbering() {
     COORD orgPos = getCursorPos();
-	for (int j = 0; j < getCityNum(); ++j)
-        printMapMes(std::to_string(j)+": "+getChsCityName(j));
-	setStdCursorPos(orgPos.X, orgPos.Y);
+    for (int j = 0; j < getCityNum(); ++j)
+        printMapMes(std::to_string(j) + ": " + getChsCityName(j));
+    setStdCursorPos(orgPos.X, orgPos.Y);
 }
 
 void Map::saveScreen() {
@@ -324,10 +338,10 @@ void Map::saveScreen() {
     DWORD bytes;
 
     for (SHORT i = 0; i < height; ++i) {
-        char* t = new char[w+1]();
-        ReadConsoleOutputCharacterA(stdBuf, t, w+1, {0, i}, &bytes);
-        t[w-1] = '\0';
-        t[w-2] = '\n';
+        char* t = new char[w + 1]();
+        ReadConsoleOutputCharacterA(stdBuf, t, w + 1, {0, i}, &bytes);
+        t[w - 1] = '\0';
+        t[w - 2] = '\n';
         buffer[i] = t;
         delete[] t;
     }
@@ -356,8 +370,8 @@ void Map::printMapMes(const std::string& mes) {
             int h = getConsoleHeight() - height;
             for (int i = 1; i < h; ++i) {
                 setStdCursorPos(0, height + i);
-                buffer[i+height] = buffer[i+height+1];
-                WriteConsole(stdBuf, buffer[i+height].c_str(), buffer[i+height].size(), nullptr, nullptr);
+                buffer[i + height] = buffer[i + height + 1];
+                WriteConsole(stdBuf, buffer[i + height].c_str(), buffer[i + height].size(), nullptr, nullptr);
             }
         }
     }
@@ -369,10 +383,10 @@ void Map::printMapMes(const std::string& mes) {
         setStdCursorPos(0, yPos);
     }
     if (yPos > getConsoleHeight()) {
-        yPos = getConsoleHeight()-1;
+        yPos = getConsoleHeight() - 1;
         setStdCursorPos(0, yPos);
     }
-    buffer[yPos] = mes+std::string(w-mes.size()-1, ' ')+"\n";
+    buffer[yPos] = mes + std::string(w - mes.size() - 1, ' ') + "\n";
     WriteConsole(stdBuf, buffer[yPos].c_str(), w, nullptr, nullptr);
     mapPos.X = 0;
     mapPos.Y = getCursorPos().Y;
@@ -382,7 +396,7 @@ void Map::printMapMes(const std::string& mes) {
 
 COORD Map::getCurMesPos() const {
     auto pos = getCursorPos();
-    pos.Y -= height+1;
+    pos.Y -= height + 1;
     return pos;
 }
 
@@ -390,19 +404,18 @@ void Map::displayMap() {
     setStdCursorPos(0, 0);
     SHORT w = getConsoleWidth();
     SHORT h = getConsoleHeight();
-    for (int i = 0; i < h-height; ++i) {
-        setStdCursorPos(0, i+height+1);
-        WriteConsole(stdBuf, buffer[i+height+1].c_str(), buffer[i+height+1].size(), nullptr, nullptr);
+    for (int i = 0; i < h - height; ++i) {
+        setStdCursorPos(0, i + height + 1);
+        WriteConsole(stdBuf, buffer[i + height + 1].c_str(), buffer[i + height + 1].size(), nullptr, nullptr);
     }
     setStdCursorPos(0, height);
     std::cout << std::string(getConsoleWidth(), '=');
 
     setStdCursorPos(0, 2);
-    if (curCity_ch.size()/3*2 <= 18) {
+    if (curCity_ch.size() / 3 * 2 <= 18) {
         WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
-        std::cout << curCity_ch;
-    }
-    else {
+        std::cout << curCity_ch << "    ";
+    } else {
         WriteConsoleW(stdBuf, L"你現在位於: ", 8, nullptr, nullptr);
         std::cout << curCity_ch.substr(0, 18);
     }
@@ -419,6 +432,60 @@ void Map::clearAllMap() {
         WriteConsole(stdBuf, std::string(w, ' ').c_str(), w, nullptr, nullptr);
     preHeight = h;
     preWidth = w;
+}
+
+void Map::initSnow(int num) {
+    SHORT w = getConsoleWidth();
+    snow.resize(num, {0, 0});
+    int n = num / 5;
+    for (int i = 0; i < n; ++i) {  // init the snow.
+        COORD pos;
+        pos.X = rand() % 27;
+        pos.Y = rand() % height;
+        snow[i] = pos;
+    }
+    for (int i = n; i < num; ++i) {
+        COORD pos;
+        pos.X = rand() % (w - 49) + 49;
+        pos.Y = rand() % height;
+        snow[i] = pos;
+    }
+}
+
+void Map::showSnow(int num) {
+    static auto t = GetTickCount();
+    if (GetTickCount()-t > 100) {
+        SHORT w = getConsoleWidth();
+
+        COORD pos;
+        setColor();
+        int n = snow.size() / 5;
+        for (int i = 0; i < n; ++i) {
+            SetConsoleCursorPosition(stdBuf, snow[i]);
+            std::cout << " ";
+            if (snow[i].Y + 1 >= height) {
+                snow[i].X = rand() % 27;  // 左邊雪花
+                snow[i].Y = rand() % 6;
+            } else {
+                ++snow[i].Y;
+            }
+            SetConsoleCursorPosition(stdBuf, snow[i]);
+            std::cout << "*";
+        }
+        for (int i = n; i < snow.size(); ++i) {
+            SetConsoleCursorPosition(stdBuf, snow[i]);
+            std::cout << " ";
+            if (snow[i].Y + 1 >= height) {
+                snow[i].X = rand() % (w - 49) + 49;
+                snow[i].Y = rand() % 6;
+            } else {
+                ++snow[i].Y;
+            }
+            SetConsoleCursorPosition(stdBuf, snow[i]);
+            std::cout << "*";
+        }
+        t = GetTickCount();
+    }
 }
 
 #endif

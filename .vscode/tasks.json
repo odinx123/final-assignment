@@ -8,14 +8,11 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
-                // "D:\\Programming\\final\\final-assignment\\C110152318_main.cpp",
                 "-std=c++14",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-ID:\\Programming\\final\\final-assignment\\suite"
-                // "D:\\Programming\\final\\final-assignment\\C110152318_main.exe",
-                // "-ID:\\SoftWare\\cppLibrary\\nlhmannJson\\single_include"
-                // "-ID:\\SoftWare\\cppLibrary\\boost_1_80_0"
+                "-ID:\\Programming\\final\\final-assignment\\suite",
+                "-lwinmm"
             ],
             "options": {
                 "cwd": "${fileDirname}"

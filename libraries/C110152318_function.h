@@ -68,9 +68,9 @@ void setfps(double timePerFrame) {
     timePerFrame = 1000.f / timePerFrame;
     DWORD nowTime = GetTickCount();
     DWORD deltaTime = nowTime - lastTime;
-    lastTime = nowTime;
     if (deltaTime <= timePerFrame)
         Sleep(timePerFrame - deltaTime);
+    lastTime = GetTickCount();
 }
 
 int getNumberSize(int n) {
