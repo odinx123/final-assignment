@@ -14,21 +14,21 @@
 
 ![](https://github.com/odinx123/final-assignment/blob/main/img/5.png)
 
-# 商店功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B66.png" width="60">
+# 商店功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/6.png" width="60">
 
 <!-- 
 ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B66.png) -->
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B67.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/7.png)
 
 * 遊戲設計可以在【超級商城】買東西，在其他地方無法成功購買物品，同時超級商城也是全地圖唯一沒有怪物的地方，而在超級商城可以使用shop指令來購買東西，也可以使用sell來賣東西，並且之後在背包檢視。
     * 如果使用sell賣東西的話，價錢是根據Lv和數量來決定的。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B68.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/8.png)
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B69.png) -->
 
-# II. 怪物功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B69.png" width="50">
+# II. 怪物功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/9.png" width="50">
 
 每次移動地圖或是擊殺一定數量的怪物都會生成新的一批新的怪物，玩家可以使用fight指令選擇跟指定怪物對打，並且當擊殺一定數量的怪物的時候，會繼續生成怪物，每隻怪物都有各自機率生成，有些怪物有可能傳說裝備。
 
@@ -36,19 +36,19 @@
 
 也可以使用ls的指令來顯示怪物資訊。
 
-# 戰鬥資訊 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B611.png" width="50">
+# 戰鬥資訊 <img src="https://github.com/odinx123/final-assignment/blob/main/img/11.png" width="50">
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B610.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/10.png)
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B611.png) -->
 
 玩家可以使用【fight 怪物編號】來跟指定怪物對打，在戰鬥時玩家可以選擇釋放技能\(按空白鍵，需消耗技能點\)，也可以選擇逃跑\(ESC鍵\)，會記錄下總共擊殺多少怪物。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B612.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/12.png)
 
 # III. 角色/物品功能
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B613.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/13.png)
 
 玩家可以在商店購買裝備或補血、加防禦、攻擊等等的物品。
 
@@ -62,7 +62,7 @@
 
 # 屬性能力值
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B614.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/14.png)
 
 玩家可以使用attribute來查看剩下多少【屬性點數】可以用來升級，並且可以查玩家有加多少點數在各個屬性，後面是升級一次加多少能力，可以一次加很多屬性能力。
 
@@ -72,13 +72,13 @@
 
 爆擊方面可以用showCRT查看。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B615.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/15.png)
 
-# 等級系統 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B616.png" width="50">
+# 等級系統 <img src="https://github.com/odinx123/final-assignment/blob/main/img/16.png" width="50">
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B616.png) -->
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B617.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/17.png)
 
 玩家可以藉由打怪獲得經驗值，每隻怪物的經驗都不相同，玩家最高可升級到100等，每次升級會根據不同職業有不同傾向不同能力加成方向，並且會獲得屬性點數、技能點數、技能升級點數等等。
 
@@ -86,33 +86,33 @@
 
 玩家除了
 
-# 人物狀態欄 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B618.png" width="50">
+# 人物狀態欄 <img src="https://github.com/odinx123/final-assignment/blob/main/img/18.png" width="50">
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B618.png) -->
 
 玩家除了可以在資訊處看到人物狀態外，要升級技能或查看技能可以使用showSkill或是skill。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B619.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/19.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B620.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/20.png)
 
 # 裝備加成
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B621.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/21.png)
 
 玩家如果穿上三個部位的全套套裝就會觸發套裝效果，當然如果脫下來就會消失。
 
 遊戲中的套裝無法藉由商店獲得，只能打特殊Bose才能獲得。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B622.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/22.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B623.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/23.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B624.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/24.png)
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B625.png) -->
 
-# IV. 點數系統功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B625.png" width="50">
+# IV. 點數系統功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/25.png" width="50">
 
 在遊戲中有金錢系統，可以在商店中購買各種商品，像是裝備、藥水、食物等等，金錢可以在腳色資訊那邊看到。
 
@@ -120,7 +120,7 @@
 
 技能升級點數可以用來升級技能，玩家可輸入指令showSkill來查看技能等級和剩餘點數。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B626.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/26.png)
 
 # V. 職業功能
 
@@ -128,19 +128,19 @@
 
 每個職業的技能都會在5級之後獲得。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B627.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/27.png)
 
-# VI. 技能功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B628.png" width="50">
+# VI. 技能功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/28.png" width="50">
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B628.png) -->
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B629.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/29.png)
 
 遊戲可以使用showSkill來查看玩家技能效果和技能有關的資訊，玩家可以升級到5等就可以獲得技能，之後每次升級都可以獲得【技能升級點】，而【技能點】是在使用技能時候會消耗，每次升級後技能會得到加強，但是消耗也會變大。
 
 而技能最高可以升級到6等，可以使用skill升級技能。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B630.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/30.png)
 
 # VII.強化系統
 
@@ -148,9 +148,9 @@
 
 玩家亦可以升級裝備，使用或升級裝備時如果沒有打上裝備等級，就代表1等，如果打上等級則可選擇該等級的裝備。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B631.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/31.png)
 
-# 加持道具<img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B632.png" width="70">
+# 加持道具<img src="https://github.com/odinx123/final-assignment/blob/main/img/32.png" width="70">
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B632.png) -->
 
@@ -158,15 +158,15 @@
 
 玩家亦可以在商店購買各類補品，有補血家防禦、攻擊等等的道具。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B633.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/33.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B634.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/34.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B635.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/35.png)
 
-# VIII. 帳號功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B641.png" width="50">
+# VIII. 帳號功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/41.png" width="50">
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B636.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/36.png)
 
 玩家在登入時可以創建帳號登入遊戲，最多可創建三個帳號，如果已經滿了也可以選擇刪除帳號，使用帳號登入可獲得與之前遊玩一樣的狀態與裝備等等。
 
@@ -174,17 +174,17 @@
 
 玩家可以使用logout來登入不同帳號或是切換職業。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B637.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/37.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B638.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/38.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B639.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/39.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B640.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/40.png)
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B641.png) -->
 
-# 倉庫系統 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B642.png" width="50">
+# 倉庫系統 <img src="https://github.com/odinx123/final-assignment/blob/main/img/42.png" width="50">
 
 <!-- ![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B642.png) -->
 
@@ -194,7 +194,7 @@
 
 玩家不能將職業限定的裝備放入倉庫，也不能將已經穿上的裝備放入昌庫。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B643.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/43.png)
 
 # IX. 設計其他功能
 
@@ -206,7 +206,7 @@
 
 以及要因應聖誕節的情景，遊戲還添加了下雪的背景。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B644.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/44.png)
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B645.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/45.png)
 
