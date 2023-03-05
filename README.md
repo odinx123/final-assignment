@@ -4,7 +4,7 @@
 
 # I. 地圖功能 <img src="https://github.com/odinx123/final-assignment/blob/main/img/img3.png" width="60">
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B64.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/img4.png)
 
 首先是遊戲版面配置是分成上面跟下面，上面都是腳色資訊，下面則是遊戲時的訊息。
 
@@ -12,7 +12,7 @@
 
 如果要打指令需要按下/才能打指令\(移動時不需要\)。
 
-![](img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B65.png)
+![](https://github.com/odinx123/final-assignment/blob/main/img/5.png)
 
 # 商店功能 <img src="img%5C%E6%88%91%E7%9A%84%E5%8A%9F%E8%83%BD%E8%AA%AA%E6%98%8E%E6%96%87%E4%BB%B66.png" width="60">
 
